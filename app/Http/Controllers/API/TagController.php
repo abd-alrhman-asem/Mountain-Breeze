@@ -30,6 +30,7 @@ class TagController extends Controller
         $tag = new Tag();
 
         $tag->name = $request->name;
+        $tag->lang = $request->lang;
 
         $tag->save();
 
@@ -54,6 +55,7 @@ class TagController extends Controller
 
         $tag->update([
             'name' => $request->name??$tag->name,
+            'lang' => $request->lang??$tag->lang,
         ]);
 
         return response()->json(new TagResource($tag), 200);

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Article;
+use App\Models\Article_Tags;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ArticleResource;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
+use App\Models\Tag;
 
 class ArticleController extends Controller
 {
@@ -17,6 +19,7 @@ class ArticleController extends Controller
     public function index()
     {
         $articles = Article::where('deleted_at', NULL)->get();
+
         return response()->json(ArticleResource::collection($articles), 200);
     }
 
@@ -34,6 +37,7 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest  $request)
     {
+
         $validated = $request->validated();
 
         $article = new Article();
@@ -45,6 +49,8 @@ class ArticleController extends Controller
 
         $article->save();
 
+        $article->tags()->attach($request->tags);
+
         return response()->json(new ArticleResource($article), 200);
     }
 
@@ -54,6 +60,7 @@ class ArticleController extends Controller
     public function show(string $id)
     {
         $article = Article::findOrFail($id);
+
         return response()->json(new ArticleResource($article), 200);
     }
 
@@ -71,6 +78,8 @@ class ArticleController extends Controller
             'lang' => $request->lang ?? $article->lang,
         ]);
 
+        $article->tags()->sync($request->tags);
+
         return response()->json(new ArticleResource($article), 200);
     }
 
@@ -79,7 +88,7 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        $article->delete();
+        $article->tags()->detach();
         return response()->json('Deleted Done', 200);
     }
 }

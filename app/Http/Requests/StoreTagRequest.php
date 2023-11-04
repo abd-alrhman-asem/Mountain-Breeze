@@ -24,6 +24,7 @@ class StoreTagRequest extends FormRequest
         //dd($this->all());
         return [
             'name'=>'required|string',
+            'lang'=>'string',
         ];
     }
 }

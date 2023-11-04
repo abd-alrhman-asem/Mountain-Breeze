@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use App\Http\Resources\TagResource;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ArticleResource extends JsonResource
@@ -19,6 +20,7 @@ class ArticleResource extends JsonResource
             'summary'=> $this->summary,
             'description'=>$this->description,
             'created_at'=>$this->created_at,
+            'tags'=> TagResource::collection($this->tags),
         ];
     }
 }

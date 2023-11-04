@@ -23,4 +23,13 @@ class Article extends Model
         'lang',
     ];
 
+    /**
+     * Get all of the comments for the User
+     *
+     */
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
+
 }

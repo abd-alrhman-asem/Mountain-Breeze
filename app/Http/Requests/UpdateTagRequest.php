@@ -23,6 +23,7 @@ class UpdateTagRequest extends FormRequest
     {
         return [
             'name'=>'required|string',
+            'lang'=>'string',
         ];
     }
 }
