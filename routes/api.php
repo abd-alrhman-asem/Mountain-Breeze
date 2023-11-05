@@ -20,8 +20,11 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
 Route::apiResource('articles',ArticleController::class);
 
 Route::get('/deleted',[ArticleController::class,'deleted_articles']);
+
+Route::get('/related/{id}',[ArticleController::class,'related_articles']);
 
 Route::apiResource('tags',TagController::class);
