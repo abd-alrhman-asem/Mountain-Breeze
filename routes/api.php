@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\ArticleController;
+use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\TagController;
 use App\Models\Article;
 use Illuminate\Http\Request;
@@ -25,3 +26,5 @@ Route::apiResource('articles',ArticleController::class);
 Route::get('/deleted',[ArticleController::class,'deleted_articles']);
 
 Route::apiResource('tags',TagController::class);
+
+Route::apiResource('generals',GeneralController::class);
