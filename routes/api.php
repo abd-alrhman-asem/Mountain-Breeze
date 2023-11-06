@@ -27,4 +27,6 @@ Route::get('/deleted',[ArticleController::class,'deleted_articles']);
 
 Route::apiResource('tags',TagController::class);
 
-Route::apiResource('helpcenter',HelpCenterController::class);
+Route::apiResource('helpcenter',HelpCenterController::class)->except(['store']);
+
+Route::post('/store',[ HelpCenterController::class,'store']);

@@ -36,7 +36,7 @@ class HelpCenterController extends Controller
         $validated = $request->validated();
         $question =  new HelpCenter();
 
-        $question->full_name = $request->fullname;
+        $question->full_name = $request->full_name;
         $question->phone     = $request->phone;
         $question->email     = $request->email;
         $question->subject   = $request->subject;

@@ -26,7 +26,7 @@ class StoreHelpCenterRequest extends FormRequest
             'phone'    =>'required|string',
             'email'    =>'required|email',
             'subject'  =>'required|string',
-            'message'  =>'required|string'
+            'message'  =>'required|string',
         ];
     }
 }
