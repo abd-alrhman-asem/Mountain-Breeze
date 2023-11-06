@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use DateTime;
-use Carbon\Carbon;
 use App\Models\Tag;
 use App\Models\Article;
 use App\Models\Article_Tags;
