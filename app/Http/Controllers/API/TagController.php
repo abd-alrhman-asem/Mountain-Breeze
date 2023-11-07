@@ -8,16 +8,22 @@ use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
+use App\Traits\APIResponseTrait;
 
 class TagController extends Controller
 {
+    use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $tag = Tag::all();
-        return response()->json(TagResource::collection($tag), 200);
+        try {
+            $tag = Tag::all();
+            return $this->successResponse(TagResource::collection($tag));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -25,16 +31,19 @@ class TagController extends Controller
      */
     public function store(StoreTagRequest  $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $tag = new Tag();
+           $tag = Tag::create([
+            'name'=>$request->name,
+            'lang'=>$request->lang,
+           ]);
 
-        $tag->name = $request->name;
-        $tag->lang = $request->lang;
+            return $this->successResponse(new TagResource($tag));
 
-        $tag->save();
-
-        return response()->json(new TagResource($tag), 200);
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -42,8 +51,13 @@ class TagController extends Controller
      */
     public function show(string $id)
     {
-        $tag = Tag::findOrFail($id);
-        return response()->json(new TagResource($tag), 200);
+        try {
+            $tag = Tag::findOrFail($id);
+            return $this->successResponse(new TagResource($tag));
+
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -51,14 +65,18 @@ class TagController extends Controller
      */
     public function update(UpdateTagRequest $request, Tag $tag)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $tag->update([
-            'name' => $request->name??$tag->name,
-            'lang' => $request->lang??$tag->lang,
-        ]);
+            $tag->update([
+                'name' => $request->name ?? $tag->name,
+                'lang' => $request->lang ?? $tag->lang,
+            ]);
+            return $this->successResponse(new TagResource($tag));
 
-        return response()->json(new TagResource($tag), 200);
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -66,7 +84,12 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag)
     {
-        $tag->delete();
-        return response()->json('Deleted Done', 200);
+        try {
+            $tag->delete();
+            return $this->successResponse(new TagResource($tag));
+
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 }

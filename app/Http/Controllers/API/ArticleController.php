@@ -2,39 +2,40 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Models\Tag;
-use App\Models\Article;
-use App\Models\Article_Tags;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ArticleResource;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
-
-
+use App\Http\Resources\ArticleResource;
+use App\Models\Article;
+use App\Models\Tag;
+use App\Traits\APIResponseTrait;
+use Illuminate\Http\Request;
 
 class ArticleController extends Controller
 {
+    use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $articles = Article::all();
+        try {
+            $articles = Article::all();
 
-        if($request->has('created_at')){
-            $articles= Article::where('created_at','=', $request->created_at)->get();
+            if ($request->has('created_at')) {
+                $articles = Article::where('created_at', '=', $request->created_at)->get();
+            }
+
+            if ($request->has('id')) {
+                $tagName = Tag::findOrFail($request->id);
+                $articles = Article::whereHas('tags', function ($query) use ($tagName) {
+                    $query->whereName($tagName->name);
+                })->get();
+            }
+            return $this->successResponse(ArticleResource::collection($articles));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
         }
-
-        if($request->has('id'))
-        {
-            $tagName = Tag::findOrFail($request->id);
-            $articles = Article::whereHas('tags', function ($query) use ($tagName) {
-                $query->whereName($tagName->name);
-            })->get();
-        }
-
-        return response()->json(ArticleResource::collection($articles), 200);
     }
 
     /**
@@ -42,8 +43,12 @@ class ArticleController extends Controller
      */
     public function deleted_articles()
     {
-        $articles = Article::onlyTrashed()->get();
-        return response()->json(ArticleResource::collection($articles), 200);
+        try {
+            $articles = Article::onlyTrashed()->get();
+            return $this->successResponse(ArticleResource::collection($articles));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -51,37 +56,42 @@ class ArticleController extends Controller
      */
     public function related_articles(string $id)
     {
-        $article = Article::findOrFail($id);
+        try {
+            $article = Article::findOrFail($id);
 
-        $tags = $article->tags;
+            $tags = $article->tags;
 
-        foreach ($tags as $tag) {
-            $related_articles = $tag->articles->all();
+            foreach ($tags as $tag) {
+                $related_articles = $tag->articles->all();
+            }
+            return $this->successResponse(ArticleResource::collection($related_articles));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
         }
-
-        return response()->json(ArticleResource::collection($related_articles), 200);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreArticleRequest  $request)
+    public function store(StoreArticleRequest $request)
     {
+        try {
+            $validated = $request->validated();
 
-        $validated = $request->validated();
+            $article = new Article();
 
-        $article = new Article();
+            $article->title = $request->title;
+            $article->summary = $request->summary;
+            $article->description = $request->description;
+            $article->lang = $request->lang;
 
-        $article->title = $request->title;
-        $article->summary = $request->summary;
-        $article->description = $request->description;
-        $article->lang = $request->lang;
+            $article->save();
 
-        $article->save();
-
-        $article->tags()->attach($request->tags);
-
-        return response()->json(new ArticleResource($article), 200);
+            $article->tags()->attach($request->tags);
+            return $this->successResponse(new ArticleResource($article));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -89,9 +99,12 @@ class ArticleController extends Controller
      */
     public function show(string $id)
     {
-        $article = Article::findOrFail($id);
-
-        return response()->json(new ArticleResource($article), 200);
+        try {
+            $article = Article::findOrFail($id);
+            return $this->successResponse(new ArticleResource($article));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -99,18 +112,21 @@ class ArticleController extends Controller
      */
     public function update(UpdateArticleRequest $request, Article $article)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $article->update([
-            'title' => $request->title ?? $article->title,
-            'summary' => $request->summary ?? $article->summary,
-            'description' => $request->description ?? $article->description,
-            'lang' => $request->lang ?? $article->lang,
-        ]);
+            $article->update([
+                'title' => $request->title ?? $article->title,
+                'summary' => $request->summary ?? $article->summary,
+                'description' => $request->description ?? $article->description,
+                'lang' => $request->lang ?? $article->lang,
+            ]);
 
-        $article->tags()->sync($request->tags);
-
-        return response()->json(new ArticleResource($article), 200);
+            $article->tags()->sync($request->tags);
+            return $this->successResponse(new ArticleResource($article));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -118,7 +134,11 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
-        $article->tags()->detach();
-        return response()->json('Deleted Done', 200);
+        try {
+            $article->tags()->detach();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 }

@@ -8,16 +8,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\GeneralResource;
 use App\Http\Requests\StoreGeneralRequest;
 use App\Http\Requests\UpdateGeneralRequest;
+use App\Traits\APIResponseTrait;
 
 class GeneralController extends Controller
 {
+    use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $information = General::all();
-        return response()->json(GeneralResource::collection($information), 200);
+        try {
+            $information = General::all();
+            return $this->successResponse(GeneralResource::collection($information));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -25,14 +31,18 @@ class GeneralController extends Controller
      */
     public function store(StoreGeneralRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $information =   General::create([
-            'name' => $request->name,
-            'value' => $request->value,
-            'lang' => $request->lang,
-        ]);
-        return response()->json(new GeneralResource($information), 200);
+            $information =   General::create([
+                'name' => $request->name,
+                'value' => $request->value,
+                'lang' => $request->lang,
+            ]);
+            return $this->successResponse(new GeneralResource($information));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -40,8 +50,12 @@ class GeneralController extends Controller
      */
     public function show(string $id)
     {
-        $information = General::findOrFail($id);
-        return response()->json(new GeneralResource($information), 200);
+        try {
+            $information = General::findOrFail($id);
+            return $this->successResponse(new GeneralResource($information));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -49,16 +63,17 @@ class GeneralController extends Controller
      */
     public function update(UpdateGeneralRequest $request, General $general)
     {
-        $validated = $request->validated();
-
-
-        $general->update([
-            'name' => $request->name??$general->name,
-            'value' => $request->value??$general->value,
-            'lang' => $request->lang??$general->lang,
-        ]);
-
-        return response()->json(new GeneralResource($general), 200);
+        try {
+            $validated = $request->validated();
+            $general->update([
+                'name' => $request->name ?? $general->name,
+                'value' => $request->value ?? $general->value,
+                'lang' => $request->lang ?? $general->lang,
+            ]);
+            return $this->successResponse(new GeneralResource($general));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -66,7 +81,11 @@ class GeneralController extends Controller
      */
     public function destroy(General $general)
     {
-        $general->delete();
-        return response()->json('Deleted Done', 200);
+        try {
+            $general->delete();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 }

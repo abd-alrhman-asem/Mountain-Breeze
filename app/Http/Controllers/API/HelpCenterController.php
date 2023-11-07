@@ -7,25 +7,34 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\HelpCenterResource;
 use App\Http\Requests\StoreHelpCenterRequest;
+use App\Traits\APIResponseTrait;
 
 class HelpCenterController extends Controller
 {
+    use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $questions = HelpCenter::all();
-        return response()->json(HelpCenterResource::collection($questions), 200);
-
+        try {
+            $questions = HelpCenter::all();
+            return $this->successResponse(HelpCenterResource::collection($questions));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
-     /**
+    /**
      * Display a listing of the deleted resource.
      */
     public function deleted_questions()
     {
-        $questions = HelpCenter::onlyTrashed()->get();
-        return response()->json(HelpCenterResource::collection($questions), 200);
+        try {
+            $questions = HelpCenter::onlyTrashed()->get();
+            return $this->successResponse(HelpCenterResource::collection($questions));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -33,18 +42,21 @@ class HelpCenterController extends Controller
      */
     public function store(StoreHelpCenterRequest $request)
     {
-        $validated = $request->validated();
-        $question =  new HelpCenter();
+        try {
+            $validated = $request->validated();
+            $question =  new HelpCenter();
 
-        $question->full_name = $request->full_name;
-        $question->phone     = $request->phone;
-        $question->email     = $request->email;
-        $question->subject   = $request->subject;
-        $question->message   = $request->message;
+            $question->full_name = $request->full_name;
+            $question->phone     = $request->phone;
+            $question->email     = $request->email;
+            $question->subject   = $request->subject;
+            $question->message   = $request->message;
 
-        $question->save();
-
-        return response()->json(new HelpCenterResource($question), 200);
+            $question->save();
+            return $this->successResponse(new HelpCenterResource($question));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -52,9 +64,12 @@ class HelpCenterController extends Controller
      */
     public function show(string $id)
     {
-        $question = HelpCenter::findOrFail($id);
-
-        return response()->json(new HelpCenterResource($question), 200);
+        try {
+            $question = HelpCenter::findOrFail($id);
+            return $this->successResponse(new HelpCenterResource($question));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -70,7 +85,11 @@ class HelpCenterController extends Controller
      */
     public function destroy(HelpCenter $helpCenter)
     {
-        $helpCenter->delete();
-        return response()->json('Deleted Done', 200);
+        try {
+            $helpCenter->delete();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 }
