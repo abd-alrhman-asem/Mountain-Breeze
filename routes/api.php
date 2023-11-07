@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\ArticleController;
+use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\HelpCenterController;
 use App\Http\Controllers\API\TagController;
@@ -30,6 +31,8 @@ Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->n
 Route::get('/related_articles/{id}',[ArticleController::class,'related_articles'])->name('related_articles');
 
 Route::apiResource('tags',TagController::class);
+
+Route::apiResource('socials',SocialController::class);
 
 Route::apiResource('helpcenter',HelpCenterController::class);
 
