@@ -4,6 +4,7 @@ use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\HelpCenterController;
+use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\TagController;
 use App\Models\Article;
 use Illuminate\Http\Request;
@@ -38,3 +39,5 @@ Route::apiResource('helpcenter',HelpCenterController::class);
 
 
 Route::apiResource('generals',GeneralController::class);
+
+Route::apiResource('roomtypes',RoomTypeController::class);
