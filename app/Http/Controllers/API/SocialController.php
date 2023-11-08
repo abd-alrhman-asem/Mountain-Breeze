@@ -8,16 +8,22 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\SocialResource;
 use App\Http\Requests\StoreSocialRequest;
 use App\Http\Requests\UpdateSocialRequest;
+use App\Traits\APIResponseTrait;
 
 class SocialController extends Controller
 {
+    use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $link = SocialMedia::all();
-        return response()->json(SocialResource::collection($link), 200);
+        try {
+            $link = SocialMedia::all();
+            return $this->successResponse(SocialResource::collection($link));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -25,14 +31,17 @@ class SocialController extends Controller
      */
     public function store(StoreSocialRequest $request)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $link = SocialMedia::create([
-            'name' => $request->name,
-            'link' => $request->link,
-        ]);
-
-        return response()->json(new SocialResource($link), 200);
+            $link = SocialMedia::create([
+                'name' => $request->name,
+                'link' => $request->link,
+            ]);
+            return $this->successResponse(new SocialResource($link));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -40,10 +49,12 @@ class SocialController extends Controller
      */
     public function show(string $id)
     {
-        $link = SocialMedia::findOrFail($id);
-
-        return response()->json(new SocialResource($link), 200);
-
+        try {
+            $link = SocialMedia::findOrFail($id);
+            return $this->successResponse(new SocialResource($link));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -51,16 +62,19 @@ class SocialController extends Controller
      */
     public function update(UpdateSocialRequest $request, String $id)
     {
-        $validated = $request->validated();
+        try {
+            $validated = $request->validated();
 
-        $link = SocialMedia::findOrFail($id);
+            $link = SocialMedia::findOrFail($id);
 
-        $link->update([
-            'name' => $request->name,
-            'link' => $request->link,
-        ]);
-
-        return response()->json(new SocialResource($link), 200);
+            $link->update([
+                'name' => $request->name,
+                'link' => $request->link,
+            ]);
+            return $this->successResponse(new SocialResource($link));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 
     /**
@@ -68,11 +82,13 @@ class SocialController extends Controller
      */
     public function destroy(string $id)
     {
-        $link = SocialMedia::findOrFail($id);
+        try {
+            $link = SocialMedia::findOrFail($id);
 
-        $link->delete();
-
-        return response()->json('Deleted Done', 200);
-
+            $link->delete();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th);
+        }
     }
 }
