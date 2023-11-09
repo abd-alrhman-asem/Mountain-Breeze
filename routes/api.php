@@ -7,6 +7,7 @@ use App\Http\Controllers\API\TagController;
 use App\Http\Controllers\API\RoomController;
 use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\ArticleController;
+use App\Http\Controllers\API\FoodCategoryController;
 use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\RoomTypeController;
@@ -44,6 +45,7 @@ Route::apiResource('generals',GeneralController::class);
 
 Route::apiResource('roomtypes',RoomTypeController::class);
 
+Route::apiResource('foodcategories',FoodCategoryController::class);
 Route::apiResource('bookings',BookingController::class)->except(['update']);
 
 Route::apiResource('rooms', RoomController::class);
