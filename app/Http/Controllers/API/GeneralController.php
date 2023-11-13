@@ -4,11 +4,13 @@ namespace App\Http\Controllers\API;
 
 use App\Models\General;
 use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
 use App\Http\Resources\GeneralResource;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreGeneralRequest;
 use App\Http\Requests\UpdateGeneralRequest;
-use App\Traits\APIResponseTrait;
 
 class GeneralController extends Controller
 {
@@ -39,6 +41,14 @@ class GeneralController extends Controller
                 'value' => $request->value,
                 'lang' => $request->lang,
             ]);
+            if ($request->hasFile('icon')) {
+                $icon = $request->file('icon');
+                $filename = time() . '.' .  $icon->getClientOriginalExtension();
+                $icon->storeAs('public/images', $filename);
+                $information->icon = $filename;
+                $information->save();
+            }
+
             return $this->successResponse(new GeneralResource($information));
         } catch (\Throwable $th) {
             return $this->FailResponse($th);
@@ -61,27 +71,36 @@ class GeneralController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateGeneralRequest $request, General $general)
+    public function update(Request $request, string $id)
     {
-        try {
-            $validated = $request->validated();
-            $general->update([
-                'name' => $request->name ?? $general->name,
-                'value' => $request->value ?? $general->value,
-                'lang' => $request->lang ?? $general->lang,
-            ]);
-            return $this->successResponse(new GeneralResource($general));
-        } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+        $general = General::findOrFail($id);
+        //return $general;
+        //return $request;
+        dd($request);
+        if ($request->has('icon')) {
+            //return 1;
+            Storage::delete('public/images/' . $general->icon);
+            //return 1;
+            $icon = $request->file('icon');
+            $filename = time() . '.' .  $icon->getClientOriginalExtension();
+            $icon->storeAs('public/images', $filename);
+            $general->icon = $filename;
         }
+        $general->update([
+            'name' => $request->name,
+            'value' => $request->value,
+            'lang' => $request->lang,
+            'icon' => $filename,
+        ]);
+        return $general;
     }
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(General $general)
     {
         try {
+            Storage::delete('public/images/' . $general->icon);
             $general->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
