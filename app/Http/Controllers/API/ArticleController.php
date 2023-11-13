@@ -34,7 +34,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -47,7 +47,7 @@ class ArticleController extends Controller
             $articles = Article::onlyTrashed()->get();
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -66,7 +66,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(ArticleResource::collection($related_articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -75,6 +75,7 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+
         try {
             $validated = $request->validated();
 
@@ -90,7 +91,7 @@ class ArticleController extends Controller
             $article->tags()->attach($request->tags);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' Create not done');
         }
     }
 
@@ -103,7 +104,7 @@ class ArticleController extends Controller
             $article = Article::findOrFail($id);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There is no article');
         }
     }
 
@@ -125,7 +126,7 @@ class ArticleController extends Controller
             $article->tags()->sync($request->tags);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' update not done');
         }
     }
 
@@ -138,7 +139,7 @@ class ArticleController extends Controller
             $article->tags()->detach();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' delete not done');
         }
     }
 }
