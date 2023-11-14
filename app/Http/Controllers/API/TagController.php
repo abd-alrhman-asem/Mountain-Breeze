@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Tag;
-use Illuminate\Http\Request;
 use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTagRequest;
@@ -22,7 +21,7 @@ class TagController extends Controller
             $tag = Tag::all();
             return $this->successResponse(TagResource::collection($tag));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no tag');
         }
     }
 
@@ -42,7 +41,7 @@ class TagController extends Controller
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -54,19 +53,19 @@ class TagController extends Controller
         try {
             $tag = Tag::findOrFail($id);
             return $this->successResponse(new TagResource($tag));
-
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no tag');
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTagRequest $request, Tag $tag)
+    public function update(UpdateTagRequest $request, string $id)
     {
         try {
             $validated = $request->validated();
+            $tag = Tag::findOrFail($id);
 
             $tag->update([
                 'name' => $request->name ?? $tag->name,
@@ -75,21 +74,22 @@ class TagController extends Controller
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Tag $tag)
+    public function destroy(string $id)
     {
         try {
+            $tag = Tag::findOrFail($id);
             $tag->delete();
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no tag to delete');
         }
     }
 }

@@ -17,7 +17,7 @@ trait APIResponseTrait
         ]], Response::HTTP_OK);
     }
 
-    public function FailResponse(string $message)
+    public function FailResponse(String $message)
     {
         return response()->json([
             'data' => [

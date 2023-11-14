@@ -38,7 +38,7 @@ class RoomController extends Controller
 
             return $this->successResponse(RoomResource::collection($rooms));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no rooms');
         }
     }
         /**
@@ -50,7 +50,7 @@ class RoomController extends Controller
            $rooms = Room::onlyTrashed()->get();
             return $this->successResponse(RoomResource::collection($rooms));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no rooms');
         }
     }
 
@@ -75,7 +75,7 @@ class RoomController extends Controller
 
              return $this->successResponse(new RoomResource($room));
          } catch (\Throwable $th) {
-             return $this->FailResponse($th);
+             return $this->FailResponse('create not done');
          }
     }
 
@@ -88,7 +88,7 @@ class RoomController extends Controller
             $room = Room::findOrFail($id);
              return $this->successResponse(new RoomResource($room));
          } catch (\Throwable $th) {
-             return $this->FailResponse($th);
+             return $this->FailResponse('there is no room');
          }
     }
 
@@ -112,7 +112,7 @@ class RoomController extends Controller
             $room->services()->sync($request->services);
              return $this->successResponse(new RoomResource($room));
          } catch (\Throwable $th) {
-             return $this->FailResponse($th);
+             return $this->FailResponse('update not done');
          }
     }
 
@@ -126,7 +126,7 @@ class RoomController extends Controller
             $room->services()->detach();
              return $this->successResponse();
          } catch (\Throwable $th) {
-             return $this->FailResponse($th);
+             return $this->FailResponse('there is no room to delete');
          }
     }
 }

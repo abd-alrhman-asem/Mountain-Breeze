@@ -28,6 +28,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::fallback(function(){
+    return response()->json([
+        'message' => 'Page Not Found.'], 404);
+});
+
 Route::apiResource('articles',ArticleController::class);
 
 Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->name('deleted_articles');

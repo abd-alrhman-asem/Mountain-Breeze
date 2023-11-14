@@ -111,10 +111,11 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArticleRequest $request, Article $article)
+    public function update(UpdateArticleRequest $request, string $id)
     {
         try {
             $validated = $request->validated();
+            $article = Article::findOrFail($id);
 
             $article->update([
                 'title' => $request->title ?? $article->title,
