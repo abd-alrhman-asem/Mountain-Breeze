@@ -1,19 +1,21 @@
 <?php
 
-use App\Http\Controllers\API\ServiceController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\TagController;
+use App\Http\Controllers\API\FoodController;
 use App\Http\Controllers\API\RoomController;
 use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\ArticleController;
-use App\Http\Controllers\API\FoodCategoryController;
 use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\GeneralController;
+use App\Http\Controllers\API\ServiceController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
+use App\Http\Controllers\API\LanguageController;
 use App\Http\Controllers\API\PostController;
+use App\Http\Controllers\API\FoodCategoryController;
 use App\Http\Controllers\API\UserController;
 
 /*
@@ -30,6 +32,7 @@ use App\Http\Controllers\API\UserController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::apiResource('languages',LanguageController::class);
 Route::apiResource('posts',PostController::class);
 
 
@@ -54,6 +57,9 @@ Route::apiResource('generals',GeneralController::class);
 Route::apiResource('roomtypes',RoomTypeController::class);
 
 Route::apiResource('foodcategories',FoodCategoryController::class);
+
+
+Route::apiResource('foods', FoodController::class);
 
 
 Route::apiResource('bookings',BookingController::class)->except(['update']);

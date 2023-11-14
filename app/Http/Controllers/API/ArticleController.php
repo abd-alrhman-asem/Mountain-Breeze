@@ -20,17 +20,17 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         try {
-            $articles = Article::all();
+            $articles = Article::paginate(9);
 
             if ($request->has('created_at')) {
-                $articles = Article::where('created_at', '=', $request->created_at)->get();
+                $articles = Article::where('created_at', '=', $request->created_at)->paginate(9);
             }
 
             if ($request->has('id')) {
                 $tagName = Tag::findOrFail($request->id);
                 $articles = Article::whereHas('tags', function ($query) use ($tagName) {
                     $query->whereName($tagName->name);
-                })->get();
+                })->paginate(9);
             }
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
