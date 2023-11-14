@@ -5,17 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class FoodCategory extends Model
+class Post extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
+        'title',
         'summary',
+        'description',
         'lang',
     ];
-
-    public function foods(){
-        return $this->hasMany(Food::class);
-    }
 }
