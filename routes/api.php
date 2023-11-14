@@ -8,10 +8,12 @@ use App\Http\Controllers\API\RoomController;
 use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\BookingController;
+use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\ServiceController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
+use App\Http\Controllers\API\PostController;
 use App\Http\Controllers\API\FoodCategoryController;
 
 /*
@@ -28,8 +30,12 @@ use App\Http\Controllers\API\FoodCategoryController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::apiResource('posts',PostController::class);
+
 
 Route::apiResource('articles',ArticleController::class);
+
+Route::apiResource('categories',CategoryController::class);
 
 Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->name('deleted_articles');
 
@@ -41,12 +47,12 @@ Route::apiResource('socials',SocialController::class);
 
 Route::apiResource('helpcenter',HelpCenterController::class);
 
-
 Route::apiResource('generals',GeneralController::class);
 
 Route::apiResource('roomtypes',RoomTypeController::class);
 
 Route::apiResource('foodcategories',FoodCategoryController::class);
+
 
 Route::apiResource('foods', FoodController::class);
 
