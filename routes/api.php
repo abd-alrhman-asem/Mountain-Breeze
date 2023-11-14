@@ -13,6 +13,7 @@ use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\ServiceController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
+use App\Http\Controllers\API\LanguageController;
 use App\Http\Controllers\API\PostController;
 use App\Http\Controllers\API\FoodCategoryController;
 
@@ -30,6 +31,7 @@ use App\Http\Controllers\API\FoodCategoryController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::apiResource('languages',LanguageController::class);
 Route::apiResource('posts',PostController::class);
 
 
