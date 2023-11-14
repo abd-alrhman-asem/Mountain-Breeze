@@ -16,6 +16,7 @@ use App\Http\Controllers\API\HelpCenterController;
 use App\Http\Controllers\API\LanguageController;
 use App\Http\Controllers\API\PostController;
 use App\Http\Controllers\API\FoodCategoryController;
+use App\Http\Controllers\API\UserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +35,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::apiResource('languages',LanguageController::class);
 Route::apiResource('posts',PostController::class);
 
+
+Route::apiResource('users',UserController::class);
 
 Route::apiResource('articles',ArticleController::class);
 
@@ -57,6 +60,7 @@ Route::apiResource('foodcategories',FoodCategoryController::class);
 
 
 Route::apiResource('foods', FoodController::class);
+
 
 Route::apiResource('bookings',BookingController::class)->except(['update']);
 
