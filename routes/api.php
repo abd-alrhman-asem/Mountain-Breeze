@@ -9,6 +9,7 @@ use App\Http\Controllers\API\SocialController;
 use App\Http\Controllers\API\ArticleController;
 use App\Http\Controllers\API\FoodCategoryController;
 use App\Http\Controllers\API\BookingController;
+use App\Http\Controllers\API\CategoryController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
@@ -30,7 +31,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::apiResource('posts',PostController::class);
 
+
 Route::apiResource('articles',ArticleController::class);
+
+Route::apiResource('categories',CategoryController::class);
 
 Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->name('deleted_articles');
 
