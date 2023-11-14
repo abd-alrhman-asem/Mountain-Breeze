@@ -12,6 +12,7 @@ use App\Http\Controllers\API\BookingController;
 use App\Http\Controllers\API\GeneralController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
+use App\Http\Controllers\API\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,7 @@ use App\Http\Controllers\API\HelpCenterController;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+Route::apiResource('posts',PostController::class);
 
 Route::apiResource('articles',ArticleController::class);
 
@@ -40,12 +42,12 @@ Route::apiResource('socials',SocialController::class);
 
 Route::apiResource('helpcenter',HelpCenterController::class);
 
-
 Route::apiResource('generals',GeneralController::class);
 
 Route::apiResource('roomtypes',RoomTypeController::class);
 
 Route::apiResource('foodcategories',FoodCategoryController::class);
+
 Route::apiResource('bookings',BookingController::class)->except(['update']);
 
 Route::apiResource('rooms', RoomController::class);
