@@ -18,10 +18,10 @@ class LanguageController extends Controller
     public function index()
     {
         try {
-            $lang = Language::all();
-            return $this->successResponse(LanguageResource::collection($lang));
+            $languages = Language::all();
+            return $this->successResponse(LanguageResource::collection($languages));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no languages');
         }
     }
 
@@ -32,12 +32,12 @@ class LanguageController extends Controller
     {
         try {
             $validate =$request->validated();
-            $lang = Language::create([
+            $language = Language::create([
                 'name'=>$request->name,
             ]);
-            return $this->successResponse(new LanguageResource($lang));
+            return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -47,10 +47,10 @@ class LanguageController extends Controller
     public function show(string $id)
     {
         try {
-            $lang = Language::findOrFail($id);
-            return $this->successResponse(new LanguageResource($lang));
+            $language = Language::findOrFail($id);
+            return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no language');
         }
     }
 
@@ -61,13 +61,13 @@ class LanguageController extends Controller
     {
         try {
             $validate =$request->validated();
-            $lang = Language::findOrFail($id);
-            $lang ->update([
-                'name'=> $request->name ??$lang->name,
+            $language = Language::findOrFail($id);
+            $language->update([
+                'name'=> $request->name ??$language->name,
             ]);
-            return $this->successResponse(new LanguageResource($lang));
+            return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
@@ -77,11 +77,11 @@ class LanguageController extends Controller
     public function destroy(string $id)
     {
         try {
-            $lang = Language::findOrFail($id);
-            $lang->delete();
+            $language = Language::findOrFail($id);
+            $language->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no language to delete');
         }
     }
 }

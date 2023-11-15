@@ -21,7 +21,7 @@ class PostController extends Controller
             $posts = Post::all();
             return $this->successResponse(PostResource::collection($posts));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no posts');
         }
     }
 
@@ -40,7 +40,7 @@ class PostController extends Controller
             ]);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create  not done');
         }
     }
 
@@ -53,7 +53,7 @@ class PostController extends Controller
             $post = Post::findORFail($id);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no post');
         }
     }
 
@@ -73,7 +73,7 @@ class PostController extends Controller
             ]);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
@@ -87,7 +87,7 @@ class PostController extends Controller
             $post->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no post to delete');
         }
     }
 }

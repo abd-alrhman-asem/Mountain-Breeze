@@ -39,7 +39,7 @@ class FoodController extends Controller
 
             return $this->successResponse(FoodResource::collection($food));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no foods');
         }
     }
 
@@ -58,7 +58,7 @@ class FoodController extends Controller
             ]);
             return $this->successResponse(new FoodResource($food));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -71,7 +71,7 @@ class FoodController extends Controller
             $food = Food::findOrFail($id);
             return $this->successResponse(new FoodResource($food));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no food');
         }
     }
 
@@ -91,7 +91,7 @@ class FoodController extends Controller
             ]);
             return $this->successResponse(new FoodResource($food));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
@@ -105,7 +105,7 @@ class FoodController extends Controller
             $food->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no food to delete');
         }
     }
 }
