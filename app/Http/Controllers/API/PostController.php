@@ -7,6 +7,7 @@ use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use App\Http\Resources\PostResource;
 use App\Models\Post;
+use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 
 class PostController extends Controller
@@ -15,10 +16,13 @@ class PostController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $posts = Post::all();
+            if ($request->has('category_id')) {
+                $posts = Post::where('category_id', '=', $request->category_id)->get();
+            }
             return $this->successResponse(PostResource::collection($posts));
         } catch (\Throwable $th) {
             return $this->FailResponse($th);
@@ -33,10 +37,11 @@ class PostController extends Controller
         try {
             $validated = $request->validated();
             $post = Post::create([
-                'title'      => $request->title,
-                'summary'    => $request->summary,
+                'title'       => $request->title,
+                'summary'     => $request->summary,
                 'description' => $request->description,
-                'lang'       => $request->lang,
+                'lang'        => $request->lang,
+                'category_id' => $request->category_id,
             ]);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
@@ -66,10 +71,11 @@ class PostController extends Controller
             $validated = $request->validated();
             $post = Post::findORFail($id);
             $post->update([
-                'title'      => $request->title      ?? $post->title,
-                'summary'    => $request->summary    ?? $post->summary,
+                'title'       => $request->title       ?? $post->title,
+                'summary'     => $request->summary     ?? $post->summary,
                 'description' => $request->description ?? $post->description,
-                'lang'       => $request->lang       ?? $post->lang,
+                'lang'        => $request->lang        ?? $post->lang,
+                'category_id' => $request->category_id ?? $post->category_id,
             ]);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {

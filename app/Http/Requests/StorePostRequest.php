@@ -26,6 +26,7 @@ class StorePostRequest extends FormRequest
             'summary'    =>'required|string',
             'description'=>'required|string',
             'lang'       =>'required|string',
+            'category_id'=>'required|integer',
         ];
     }
 }
