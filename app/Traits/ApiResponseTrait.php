@@ -17,12 +17,12 @@ trait APIResponseTrait
         ]], Response::HTTP_OK);
     }
 
-    public function FailResponse($exception)
+    public function FailResponse(String $message)
     {
         return response()->json([
             'data' => [
                 'success' => false,
-                'message' => $exception->getMessage(),
+                'message' => $message,
             ]
         ], $statusCode = Response::HTTP_NOT_FOUND);
     }

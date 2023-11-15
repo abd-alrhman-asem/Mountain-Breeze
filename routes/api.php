@@ -38,6 +38,11 @@ Route::apiResource('posts',PostController::class);
 
 Route::apiResource('users',UserController::class);
 
+Route::fallback(function(){
+    return response()->json([
+        'message' => 'Page Not Found.'], 404);
+});
+
 Route::apiResource('articles',ArticleController::class);
 
 Route::apiResource('categories',CategoryController::class);

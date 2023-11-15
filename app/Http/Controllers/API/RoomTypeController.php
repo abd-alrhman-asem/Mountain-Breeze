@@ -21,7 +21,7 @@ class RoomTypeController extends Controller
             $type = RoomType::all();
             return $this->successResponse(RoomTypeResource::collection($type));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no room types');
         }
     }
 
@@ -38,7 +38,7 @@ class RoomTypeController extends Controller
             ]);
             return $this->successResponse(new RoomTypeResource($roomType));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -51,7 +51,7 @@ class RoomTypeController extends Controller
             $type = RoomType::findOrFail($id);
             return $this->successResponse(new RoomTypeResource($type));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no room type');
         }
     }
 
@@ -69,7 +69,7 @@ class RoomTypeController extends Controller
             ]);
             return $this->successResponse(new RoomTypeResource($roomType));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
@@ -83,7 +83,7 @@ class RoomTypeController extends Controller
             $type->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no room type to delete');
         }
     }
 }
