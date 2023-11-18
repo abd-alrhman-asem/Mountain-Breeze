@@ -71,6 +71,8 @@ Route::apiResource('bookings',BookingController::class)->except(['update']);
 
 Route::apiResource('rooms', RoomController::class);
 
+Route::delete('/art',[HelpCenterController::class,'destroyall'])->name('deleted');
+
 Route::get('/deleted_rooms',[RoomController::class,'deleted_rooms'])->name('deleted_rooms');
 
 Route::apiResource('services', ServiceController::class);
