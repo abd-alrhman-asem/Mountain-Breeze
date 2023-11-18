@@ -181,6 +181,7 @@ class ArticleController extends Controller
     {
         try {
             $article->tags()->detach();
+            $article->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse(' delete not done');
