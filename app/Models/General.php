@@ -13,5 +13,6 @@ class General extends Model
         'name',
         'value',
         'lang',
+        'icon',
     ];
 }

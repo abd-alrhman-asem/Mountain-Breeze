@@ -57,7 +57,9 @@ Route::apiResource('socials',SocialController::class);
 
 Route::apiResource('helpcenter',HelpCenterController::class);
 
-Route::apiResource('generals',GeneralController::class);
+Route::apiResource('generals',GeneralController::class)->except(['update']);
+
+Route::put('general_update/{id}',[GeneralController::class,'update'])->name('general_update');
 
 Route::apiResource('roomtypes',RoomTypeController::class);
 

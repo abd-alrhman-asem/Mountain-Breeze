@@ -17,6 +17,7 @@ class GeneralResource extends JsonResource
         return [
             'name' => $this->name,
             'value'=>$this->value,
+            'icon'=>$this->icon,
         ];
     }
 }

@@ -25,6 +25,7 @@ class UpdateGeneralRequest extends FormRequest
             'name'=>'required|string',
             'value'=>'required|string',
             'lang'=>'required|string',
+            'icon'=>'image'
 
         ];
     }
