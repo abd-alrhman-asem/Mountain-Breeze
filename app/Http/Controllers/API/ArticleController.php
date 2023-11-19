@@ -20,21 +20,21 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         try {
-            $articles = Article::all();
+            $articles = Article::paginate(9);
 
             if ($request->has('created_at')) {
-                $articles = Article::where('created_at', '=', $request->created_at)->get();
+                $articles = Article::where('created_at', '=', $request->created_at)->paginate(9);
             }
 
             if ($request->has('id')) {
                 $tagName = Tag::findOrFail($request->id);
                 $articles = Article::whereHas('tags', function ($query) use ($tagName) {
                     $query->whereName($tagName->name);
-                })->get();
+                })->paginate(9);
             }
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -47,7 +47,7 @@ class ArticleController extends Controller
             $articles = Article::onlyTrashed()->get();
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -66,7 +66,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(ArticleResource::collection($related_articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There are no articles');
         }
     }
 
@@ -75,6 +75,7 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+
         try {
             $validated = $request->validated();
 
@@ -90,7 +91,7 @@ class ArticleController extends Controller
             $article->tags()->attach($request->tags);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' Create not done');
         }
     }
 
@@ -103,17 +104,18 @@ class ArticleController extends Controller
             $article = Article::findOrFail($id);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('There is no article');
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateArticleRequest $request, Article $article)
+    public function update(UpdateArticleRequest $request, string $id)
     {
         try {
             $validated = $request->validated();
+            $article = Article::findOrFail($id);
 
             $article->update([
                 'title' => $request->title ?? $article->title,
@@ -125,7 +127,7 @@ class ArticleController extends Controller
             $article->tags()->sync($request->tags);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' update not done');
         }
     }
 
@@ -138,7 +140,7 @@ class ArticleController extends Controller
             $article->tags()->detach();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse(' delete not done');
         }
     }
 }

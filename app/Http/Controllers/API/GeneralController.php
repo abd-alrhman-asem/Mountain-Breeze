@@ -22,7 +22,7 @@ class GeneralController extends Controller
             $information = General::all();
             return $this->successResponse(GeneralResource::collection($information));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no generals');
         }
     }
 
@@ -49,7 +49,7 @@ class GeneralController extends Controller
 
             return $this->successResponse(new GeneralResource($information));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -62,7 +62,7 @@ class GeneralController extends Controller
             $information = General::findOrFail($id);
             return $this->successResponse(new GeneralResource($information));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no general');
         }
     }
 
@@ -88,9 +88,8 @@ class GeneralController extends Controller
                 'icon' => $filename,
             ]);
             return $this->successResponse(new GeneralResource($general));
-
-          }catch (\Throwable $th) {
-            return $this->FailResponse($th);
+        } catch (\Throwable $th) {
+            return $this->FailResponse('update not done');
         }
     }
     /**
@@ -103,7 +102,7 @@ class GeneralController extends Controller
             $general->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there is no general to delete');
         }
     }
 }

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\SocialMedia;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\SocialResource;
 use App\Http\Requests\StoreSocialRequest;
@@ -22,7 +21,7 @@ class SocialController extends Controller
             $link = SocialMedia::all();
             return $this->successResponse(SocialResource::collection($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no social link');
         }
     }
 
@@ -40,7 +39,7 @@ class SocialController extends Controller
             ]);
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('create not done');
         }
     }
 
@@ -53,7 +52,7 @@ class SocialController extends Controller
             $link = SocialMedia::findOrFail($id);
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no social link');
         }
     }
 
@@ -73,7 +72,7 @@ class SocialController extends Controller
             ]);
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('update not done');
         }
     }
 
@@ -88,7 +87,7 @@ class SocialController extends Controller
             $link->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse($th);
+            return $this->FailResponse('there are no social link');
         }
     }
 }
