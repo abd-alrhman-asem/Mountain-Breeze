@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\General;
-use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\File;
 use App\Http\Resources\GeneralResource;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreGeneralRequest;
@@ -71,28 +69,29 @@ class GeneralController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateGeneralRequest $request, string $id)
     {
-        $general = General::findOrFail($id);
-        //return $general;
-        //return $request;
-        dd($request);
-        if ($request->has('icon')) {
-            //return 1;
-            Storage::delete('public/images/' . $general->icon);
-            //return 1;
-            $icon = $request->file('icon');
-            $filename = time() . '.' .  $icon->getClientOriginalExtension();
-            $icon->storeAs('public/images', $filename);
-            $general->icon = $filename;
+        try{
+            $general = General::findOrFail($id);
+
+            if ($request->has('icon')) {
+                Storage::delete('public/images/' . $general->icon);
+                $icon = $request->file('icon');
+                $filename = time() . '.' .  $icon->getClientOriginalExtension();
+                $icon->storeAs('public/images', $filename);
+                $general->icon = $filename;
+            }
+            $general->update([
+                'name' => $request->name,
+                'value' => $request->value,
+                'lang' => $request->lang,
+                'icon' => $filename,
+            ]);
+            return $this->successResponse(new GeneralResource($general));
+
+          }catch (\Throwable $th) {
+            return $this->FailResponse($th);
         }
-        $general->update([
-            'name' => $request->name,
-            'value' => $request->value,
-            'lang' => $request->lang,
-            'icon' => $filename,
-        ]);
-        return $general;
     }
     /**
      * Remove the specified resource from storage.
