@@ -5,18 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Post extends Model
+class Image extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'title',
-        'summary',
-        'description',
-        'lang',
+        'url',
+        'imagable_id',
+        'imagable_type',
     ];
 
-    public function images(){
-        return $this->morphMany(Image::class,'imagable');
+    public function imagable(){
+        return $this->morphTo();
     }
 }

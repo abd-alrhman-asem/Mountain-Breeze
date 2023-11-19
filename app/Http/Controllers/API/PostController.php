@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Post;
+use App\Models\Image;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use App\Http\Resources\PostResource;
-use App\Models\Post;
-use App\Traits\APIResponseTrait;
 
 class PostController extends Controller
 {
@@ -37,6 +38,12 @@ class PostController extends Controller
                 'summary'    => $request->summary,
                 'description' => $request->description,
                 'lang'       => $request->lang,
+            ]);
+            $image = $request->image;
+            $image = Image::create([
+                'url'          => $image,
+                'imagable_id'  => $post->id,
+                'imagable_type'=> 'App\Post',
             ]);
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
