@@ -24,7 +24,7 @@ class StoreHelpCenterRequest extends FormRequest
         return [
             'full_name'=>'required|string',
             'phone'    =>'required|string',
-            'email'    =>'required|email',
+            'email'    =>'required|email:rfc,dns',
             'subject'  =>'required|string',
             'message'  =>'required|string',
         ];
