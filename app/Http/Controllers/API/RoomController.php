@@ -124,6 +124,7 @@ class RoomController extends Controller
         try {
             $room = Room::findOrFail($id);
             $room->services()->detach();
+            $room->delete();
              return $this->successResponse();
          } catch (\Throwable $th) {
              return $this->FailResponse('there is no room to delete');

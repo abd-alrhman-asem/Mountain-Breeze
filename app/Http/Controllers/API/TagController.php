@@ -15,6 +15,13 @@ class TagController extends Controller
     /**
      * Display a listing of the resource.
      */
+      /**
+     * @OA\Get(
+     *     path="/api/tags",
+     *     summary="Get tags details",
+     *     @OA\Response(response="200", description="Success"),
+     * )
+     */
     public function index()
     {
         try {
@@ -27,6 +34,28 @@ class TagController extends Controller
 
     /**
      * Store a newly created resource in storage.
+     */
+        /**
+     * @OA\Post(
+     *     path="/api/tags",
+     *     summary="Create a new tag",
+     *     @OA\Parameter(
+     *         name="name",
+     *         in="query",
+     *         description="Article name",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *        @OA\Parameter(
+     *         name="lang",
+     *         in="query",
+     *         description="Article lang",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response="200", description="tag created successfully"),
+     *     @OA\Response(response="422", description="Validation errors")
+     * )
      */
     public function store(StoreTagRequest  $request)
     {

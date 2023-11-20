@@ -55,7 +55,7 @@ Route::apiResource('tags',TagController::class);
 
 Route::apiResource('socials',SocialController::class);
 
-Route::apiResource('helpcenter',HelpCenterController::class);
+Route::apiResource('helpcenter',HelpCenterController::class)->except(['destroy','update']);
 
 Route::apiResource('generals',GeneralController::class)->except(['update']);
 
@@ -72,6 +72,8 @@ Route::apiResource('foods', FoodController::class);
 Route::apiResource('bookings',BookingController::class)->except(['update']);
 
 Route::apiResource('rooms', RoomController::class);
+
+Route::delete('/delete',[HelpCenterController::class,'destroy'])->name('delete');
 
 Route::get('/deleted_rooms',[RoomController::class,'deleted_rooms'])->name('deleted_rooms');
 
