@@ -23,6 +23,7 @@ class RoomResource extends JsonResource
             'location'       =>$this->location,
             'room_type_id'   => new RoomTypeResource($this->types),
             'services'       => ServiceResource::collection($this->services),
+            'images'     => $this->images,
         ];
     }
 }

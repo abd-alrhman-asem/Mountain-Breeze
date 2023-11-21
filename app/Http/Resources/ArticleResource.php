@@ -20,6 +20,7 @@ class ArticleResource extends JsonResource
             'summary'=> $this->summary,
             'description'=>$this->description,
             'created_at'=>$this->created_at,
+            'images'     => $this->images,
             'tags'=> TagResource::collection($this->tags),
         ];
     }

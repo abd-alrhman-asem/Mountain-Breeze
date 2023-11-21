@@ -10,10 +10,11 @@ use App\Models\Article;
 use App\Models\Tag;
 use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
+use App\Traits\UploadImage;
 
 class ArticleController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
      */
@@ -89,6 +90,12 @@ class ArticleController extends Controller
             $article->save();
 
             $article->tags()->attach($request->tags);
+
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Articles');
+                $article->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse(' Create not done');
@@ -116,6 +123,10 @@ class ArticleController extends Controller
         try {
             $validated = $request->validated();
             $article = Article::findOrFail($id);
+            $path = 'public/Articles';
+            foreach($article->images as $image){
+                $this->DeleteImage($path,$image);
+               }
 
             $article->update([
                 'title' => $request->title ?? $article->title,
@@ -125,6 +136,12 @@ class ArticleController extends Controller
             ]);
 
             $article->tags()->sync($request->tags);
+
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Articles');
+                $article->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse(' update not done');
@@ -138,6 +155,10 @@ class ArticleController extends Controller
     {
         try {
             $article->tags()->detach();
+            $path = 'public/Articles';
+            foreach($article->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse(' delete not done');
