@@ -144,6 +144,7 @@ class RoomController extends Controller
                 $this->DeleteImage($path,$image);
                }
             $room->services()->detach();
+            $room->delete();
              return $this->successResponse();
          } catch (\Throwable $th) {
              return $this->FailResponse('there is no room to delete');
