@@ -73,20 +73,13 @@ class HelpCenterController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Remove the specified resource from storage.st
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(HelpCenter $helpCenter)
+    public function destroy(Request $request)
     {
         try {
-            $helpCenter->delete();
+            $ids = explode(",", $request->deleted_ids);
+            HelpCenter::destroy($ids);
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse('there is no question to delete');
