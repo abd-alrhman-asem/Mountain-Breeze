@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\UploadImage;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Post extends Model
 {
-    use HasFactory;
+    use HasFactory, UploadImage;
 
     protected $fillable = [
         'title',
@@ -15,4 +16,5 @@ class Post extends Model
         'description',
         'lang',
     ];
+
 }

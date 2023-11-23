@@ -4,14 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Traits\UploadImage;
 
-class SocialMedia extends Model
+class Image extends Model
 {
-    use HasFactory,UploadImage;
+    use HasFactory;
 
     protected $fillable = [
-        'name',
-        'link',
+        'url',
     ];
+
+    public function imagable(){
+        return $this->morphTo();
+    }
 }

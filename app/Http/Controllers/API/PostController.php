@@ -2,16 +2,18 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\StorePostRequest;
-use App\Http\Requests\UpdatePostRequest;
-use App\Http\Resources\PostResource;
 use App\Models\Post;
+use App\Traits\UploadImage;
 use App\Traits\APIResponseTrait;
+use App\Http\Controllers\Controller;
+use App\Http\Resources\PostResource;
+use App\Http\Requests\StorePostRequest;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Requests\UpdatePostRequest;
 
 class PostController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage ;
     /**
      * Display a listing of the resource.
      */
@@ -38,6 +40,11 @@ class PostController extends Controller
                 'description' => $request->description,
                 'lang'       => $request->lang,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Posts');
+                $post->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
             return $this->FailResponse('create  not done');
@@ -65,12 +72,21 @@ class PostController extends Controller
         try {
             $validated = $request->validated();
             $post = Post::findORFail($id);
+            $path = 'public/Posts';
+            foreach($post->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $post->update([
                 'title'      => $request->title      ?? $post->title,
                 'summary'    => $request->summary    ?? $post->summary,
                 'description' => $request->description ?? $post->description,
                 'lang'       => $request->lang       ?? $post->lang,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,$path);
+                $post->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
             return $this->FailResponse('update not done');
@@ -84,6 +100,10 @@ class PostController extends Controller
     {
         try {
             $post = Post::findORFail($id);
+            $path = 'public/Posts';
+            foreach($post->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $post->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

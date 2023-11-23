@@ -9,10 +9,11 @@ use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
 use App\Http\Resources\RoomResource;
 use App\Traits\APIResponseTrait;
+use App\Traits\UploadImage;
 
 class RoomController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
      */
@@ -73,6 +74,12 @@ class RoomController extends Controller
 
             $room->services()->attach($request->services);
 
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Rooms');
+                $room->images()->create(['url'=>$file_name]);
+            }
+
              return $this->successResponse(new RoomResource($room));
          } catch (\Throwable $th) {
              return $this->FailResponse('create not done');
@@ -100,6 +107,10 @@ class RoomController extends Controller
         try {
             $validate = $request->validated();
             $room = Room::findOrFail($id);
+            $path = 'public/Rooms';
+            foreach($room->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $room->update([
                 'name'           => $request->name           ??$room->name,
                 'description'    => $request->description    ??$room->description,
@@ -110,6 +121,11 @@ class RoomController extends Controller
                 'room_type_id'   => $request->room_type_id   ??$room->room_type_id,
             ]);
             $room->services()->sync($request->services);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Rooms');
+                $room->images()->create(['url'=>$file_name]);
+            }
              return $this->successResponse(new RoomResource($room));
          } catch (\Throwable $th) {
              return $this->FailResponse('update not done');
@@ -123,6 +139,10 @@ class RoomController extends Controller
     {
         try {
             $room = Room::findOrFail($id);
+            $path = 'public/Rooms';
+            foreach($room->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $room->services()->detach();
             $room->delete();
              return $this->successResponse();
