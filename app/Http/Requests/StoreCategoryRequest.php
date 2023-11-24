@@ -25,6 +25,7 @@ class StoreCategoryRequest extends FormRequest
             'name'=>'required|string',
             'summary'=>'required|string',
             'lang'=>'required|string',
+            'category_id'=>'integer|nullable'
         ];
     }
 }

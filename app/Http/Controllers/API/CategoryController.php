@@ -19,7 +19,10 @@ class CategoryController extends Controller
     public function index()
     {
         try {
-            $categories = Category::all();
+            //$categories = Category::all();
+            $categories = Category::whereNull('category_id')
+            ->with('subCategories')
+            ->get();
             return $this->successResponse(CategoryResource::collection($categories));
         } catch (\Throwable $th) {
             return $this->FailResponse('there are no categories ');
@@ -33,9 +36,10 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::create([
-                'name' => $request->name,
-                'summary'=>$request->summary,
-                'lang'=>$request->lang,
+                'name'       => $request->name,
+                'summary'    =>$request->summary,
+                'lang'       =>$request->lang,
+                'category_id'=>$request->category_id,
             ]);
             $get_images = $request->file('images');
             foreach($get_images as $image){
@@ -73,9 +77,10 @@ class CategoryController extends Controller
                 $this->DeleteImage($path,$image);
                }
             $category ->update([
-                'name'   => $request->name    ??$category->name,
-                'summary'=> $request->summary ??$category->summary,
-                'lang'   => $request->lang    ??$category->lang,
+                'name'       => $request->name       ??$category->name,
+                'summary'    => $request->summary    ??$category->summary,
+                'lang'       => $request->lang       ??$category->lang,
+                'category_id'=> $request->category_id??$category->category_id,
             ]);
             $get_images = $request->file('images');
             foreach($get_images as $image){

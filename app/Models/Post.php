@@ -15,6 +15,11 @@ class Post extends Model
         'summary',
         'description',
         'lang',
+        'category_id'
     ];
+
+    public function category(){
+        return $this->belongsTo(Category::class);
+    }
 
 }
