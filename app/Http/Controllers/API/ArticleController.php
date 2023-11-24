@@ -10,12 +10,20 @@ use App\Models\Article;
 use App\Models\Tag;
 use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
+use App\Traits\UploadImage;
 
 class ArticleController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
+     */
+    /**
+     * @OA\Get(
+     *     path="/api/articles",
+     *     summary="Get articles details",
+     *     @OA\Response(response="200", description="Success"),
+     * )
      */
     public function index(Request $request)
     {
@@ -73,6 +81,42 @@ class ArticleController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    /**
+     * @OA\Post(
+     *     path="/api/articles",
+     *     summary="Create a new article",
+     *     @OA\Parameter(
+     *         name="title",
+     *         in="query",
+     *         description="Article title",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *        @OA\Parameter(
+     *         name="summary",
+     *         in="query",
+     *         description="Article summary",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *        @OA\Parameter(
+     *         name="description",
+     *         in="query",
+     *         description="Article description",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *        @OA\Parameter(
+     *         name="lang",
+     *         in="query",
+     *         description="Article lang",
+     *         required=true,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(response="200", description="Article created successfully"),
+     *     @OA\Response(response="422", description="Validation errors")
+     * )
+     */
     public function store(StoreArticleRequest $request)
     {
 
@@ -89,6 +133,12 @@ class ArticleController extends Controller
             $article->save();
 
             $article->tags()->attach($request->tags);
+
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Articles');
+                $article->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse(' Create not done');
@@ -116,6 +166,10 @@ class ArticleController extends Controller
         try {
             $validated = $request->validated();
             $article = Article::findOrFail($id);
+            $path = 'public/Articles';
+            foreach($article->images as $image){
+                $this->DeleteImage($path,$image);
+               }
 
             $article->update([
                 'title' => $request->title ?? $article->title,
@@ -125,6 +179,12 @@ class ArticleController extends Controller
             ]);
 
             $article->tags()->sync($request->tags);
+
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Articles');
+                $article->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse(' update not done');
@@ -138,6 +198,11 @@ class ArticleController extends Controller
     {
         try {
             $article->tags()->detach();
+            $article->delete();
+            $path = 'public/Articles';
+            foreach($article->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse(' delete not done');

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\General;
-use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GeneralResource;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreGeneralRequest;
 use App\Http\Requests\UpdateGeneralRequest;
-use App\Traits\APIResponseTrait;
 
 class GeneralController extends Controller
 {
@@ -39,6 +39,14 @@ class GeneralController extends Controller
                 'value' => $request->value,
                 'lang' => $request->lang,
             ]);
+            if ($request->hasFile('icon')) {
+                $icon = $request->file('icon');
+                $filename = time() . '.' .  $icon->getClientOriginalExtension();
+                $icon->storeAs('public/images', $filename);
+                $information->icon = $filename;
+                $information->save();
+            }
+
             return $this->successResponse(new GeneralResource($information));
         } catch (\Throwable $th) {
             return $this->FailResponse('create not done');
@@ -63,26 +71,34 @@ class GeneralController extends Controller
      */
     public function update(UpdateGeneralRequest $request, string $id)
     {
-        try {
-            $validated = $request->validated();
+        try{
             $general = General::findOrFail($id);
+
+            if ($request->has('icon')) {
+                Storage::delete('public/images/' . $general->icon);
+                $icon = $request->file('icon');
+                $filename = time() . '.' .  $icon->getClientOriginalExtension();
+                $icon->storeAs('public/images', $filename);
+                $general->icon = $filename;
+            }
             $general->update([
-                'name' => $request->name ?? $general->name,
-                'value' => $request->value ?? $general->value,
-                'lang' => $request->lang ?? $general->lang,
+                'name' => $request->name,
+                'value' => $request->value,
+                'lang' => $request->lang,
+                'icon' => $filename,
             ]);
             return $this->successResponse(new GeneralResource($general));
         } catch (\Throwable $th) {
             return $this->FailResponse('update not done');
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */
     public function destroy(General $general)
     {
         try {
+            Storage::delete('public/images/' . $general->icon);
             $general->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

@@ -8,10 +8,11 @@ use App\Http\Resources\SocialResource;
 use App\Http\Requests\StoreSocialRequest;
 use App\Http\Requests\UpdateSocialRequest;
 use App\Traits\APIResponseTrait;
+use App\Traits\UploadImage;
 
 class SocialController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
      */
@@ -37,6 +38,11 @@ class SocialController extends Controller
                 'name' => $request->name,
                 'link' => $request->link,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/SocialMedia');
+                $link->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
             return $this->FailResponse('create not done');
@@ -65,11 +71,20 @@ class SocialController extends Controller
             $validated = $request->validated();
 
             $link = SocialMedia::findOrFail($id);
+            $path = 'public/SocialMedia';
+            foreach($link ->images as $image){
+                $this->DeleteImage($path,$image);
+               }
 
             $link->update([
                 'name' => $request->name,
                 'link' => $request->link,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/SocialMedia');
+                $link->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
             return $this->FailResponse('update not done');
@@ -83,7 +98,10 @@ class SocialController extends Controller
     {
         try {
             $link = SocialMedia::findOrFail($id);
-
+            $path = 'public/SocialMedia';
+            foreach($link ->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $link->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

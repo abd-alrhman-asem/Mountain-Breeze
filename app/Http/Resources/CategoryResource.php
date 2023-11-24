@@ -20,6 +20,7 @@ class CategoryResource extends JsonResource
             'childern_categories'=>CategoryResource::collection($this->subCategories),
             'posts'=> PostResource::collection($this->posts),
 
+            'images' => $this->images,
         ];
     }
 }

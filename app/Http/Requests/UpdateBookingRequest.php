@@ -23,7 +23,7 @@ class UpdateBookingRequest extends FormRequest
     {
         return [
             'name' =>'required|string',
-            'email'=>'required|email',
+            'email'=>'required|email:rfc,dns',
             'phone'=>'required|string',
             'check_in'=> 'required|date',
             'check_out'=> 'required|date',

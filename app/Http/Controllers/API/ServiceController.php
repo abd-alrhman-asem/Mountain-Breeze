@@ -8,10 +8,11 @@ use App\Http\Requests\UpdateServiceRequest;
 use App\Http\Resources\ServiceResource;
 use App\Models\Service;
 use App\Traits\APIResponseTrait;
+use App\Traits\UploadImage;
 
 class ServiceController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
      */
@@ -37,6 +38,12 @@ class ServiceController extends Controller
             'name'=>$request->name,
             'lang'=>$request->lang,
            ]);
+
+           $get_images = $request->file('images');
+           foreach($get_images as $image){
+               $file_name  = $this->StoreImage($image,'public/Services');
+               $service->images()->create(['url'=>$file_name]);
+           }
 
             return $this->successResponse(new ServiceResource($service));
 
@@ -66,11 +73,21 @@ class ServiceController extends Controller
         try {
             $validated = $request->validated();
             $service = Service::findOrFail($id);
+            $path = 'public/Services';
+            foreach($service->images as $image){
+                $this->DeleteImage($path,$image);
+               }
 
            $service = Service::create([
             'name'=>$request->name??$service->name,
             'lang'=>$request->lang??$service->lang,
            ]);
+
+           $get_images = $request->file('images');
+           foreach($get_images as $image){
+               $file_name  = $this->StoreImage($image,'public/Services');
+               $service->images()->create(['url'=>$file_name]);
+           }
 
             return $this->successResponse(new ServiceResource($service));
 
@@ -86,6 +103,10 @@ class ServiceController extends Controller
     {
         try {
             $service = Service::findOrFail($id);
+            $path = 'public/Services';
+            foreach($service->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $service->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

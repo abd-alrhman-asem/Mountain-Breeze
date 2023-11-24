@@ -8,10 +8,11 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use App\Traits\APIResponseTrait;
+use App\Traits\UploadImage;
 
 class CategoryController extends Controller
 {
-    use APIResponseTrait;
+    use APIResponseTrait,UploadImage;
     /**
      * Display a listing of the resource.
      */
@@ -40,6 +41,11 @@ class CategoryController extends Controller
                 'lang'       =>$request->lang,
                 'category_id'=>$request->category_id,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Category');
+                $category->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
             return $this->FailResponse('create not done');
@@ -66,12 +72,21 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
+            $path = 'public/Category';
+            foreach($category->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $category ->update([
                 'name'       => $request->name       ??$category->name,
                 'summary'    => $request->summary    ??$category->summary,
                 'lang'       => $request->lang       ??$category->lang,
                 'category_id'=> $request->category_id??$category->category_id,
             ]);
+            $get_images = $request->file('images');
+            foreach($get_images as $image){
+                $file_name  = $this->StoreImage($image,'public/Category');
+                $category->images()->create(['url'=>$file_name]);
+            }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
             return $this->FailResponse('update not done');
@@ -85,6 +100,10 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::findOrFail($id);
+            $path = 'public/Category';
+            foreach($category->images as $image){
+                $this->DeleteImage($path,$image);
+               }
             $category->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
