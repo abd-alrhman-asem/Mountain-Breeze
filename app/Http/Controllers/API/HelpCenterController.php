@@ -21,7 +21,7 @@ class HelpCenterController extends Controller
             $questions = HelpCenter::all();
             return $this->successResponse(HelpCenterResource::collection($questions));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no questions');
+            return $this->FailResponse($th->getMessage());
         }
     }
     /**
@@ -33,7 +33,7 @@ class HelpCenterController extends Controller
             $questions = HelpCenter::onlyTrashed()->get();
             return $this->successResponse(HelpCenterResource::collection($questions));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no questions');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -55,7 +55,7 @@ class HelpCenterController extends Controller
             $question->save();
             return $this->successResponse(new HelpCenterResource($question));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -68,7 +68,7 @@ class HelpCenterController extends Controller
             $question = HelpCenter::findOrFail($id);
             return $this->successResponse(new HelpCenterResource($question));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no question');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ class HelpCenterController extends Controller
             HelpCenter::destroy($ids);
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no question to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

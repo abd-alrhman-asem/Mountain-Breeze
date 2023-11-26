@@ -21,7 +21,7 @@ class LanguageController extends Controller
             $languages = Language::all();
             return $this->successResponse(LanguageResource::collection($languages));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no languages');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -37,7 +37,7 @@ class LanguageController extends Controller
             ]);
             return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -50,7 +50,7 @@ class LanguageController extends Controller
             $language = Language::findOrFail($id);
             return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no language');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -67,7 +67,7 @@ class LanguageController extends Controller
             ]);
             return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -81,7 +81,7 @@ class LanguageController extends Controller
             $language->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no language to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

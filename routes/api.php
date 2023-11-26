@@ -58,6 +58,8 @@ Route::apiResource('categories',CategoryController::class);
 
 Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->name('deleted_articles');
 
+Route::delete('/forceDestroy/{id}',[ArticleController::class,'forceDestroy'])->name('forceDestroy');
+
 Route::get('/related_articles/{id}',[ArticleController::class,'related_articles'])->name('related_articles');
 
 Route::apiResource('tags',TagController::class);

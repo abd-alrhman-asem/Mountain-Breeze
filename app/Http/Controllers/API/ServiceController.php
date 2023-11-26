@@ -22,7 +22,7 @@ class ServiceController extends Controller
             $service = Service::all();
             return $this->successResponse(ServiceResource::collection($service));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no services');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ class ServiceController extends Controller
             return $this->successResponse(new ServiceResource($service));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ class ServiceController extends Controller
             $service = Service::findOrFail($id);
             return $this->successResponse(new ServiceResource($service));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no service');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -92,7 +92,7 @@ class ServiceController extends Controller
             return $this->successResponse(new ServiceResource($service));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ class ServiceController extends Controller
             $service->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no service to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

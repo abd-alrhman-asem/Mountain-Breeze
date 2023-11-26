@@ -22,7 +22,7 @@ class SocialController extends Controller
             $link = SocialMedia::all();
             return $this->successResponse(SocialResource::collection($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no social link');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ class SocialController extends Controller
             }
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ class SocialController extends Controller
             $link = SocialMedia::findOrFail($id);
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no social link');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ class SocialController extends Controller
             }
             return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -105,7 +105,7 @@ class SocialController extends Controller
             $link->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no social link');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }
