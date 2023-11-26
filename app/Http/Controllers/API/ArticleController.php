@@ -11,10 +11,11 @@ use App\Models\Tag;
 use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
 use App\Traits\UploadImage;
+use App\Traits\UploadVideo;
 
 class ArticleController extends Controller
 {
-    use APIResponseTrait,UploadImage;
+    use APIResponseTrait, UploadImage, UploadVideo;
     /**
      * Display a listing of the resource.
      */
@@ -135,9 +136,15 @@ class ArticleController extends Controller
             $article->tags()->attach($request->tags);
 
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Articles');
-                $article->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Articles');
+                $article->images()->create(['url' => $file_name]);
+            }
+
+            $get_videos = $request->file('videos');
+            foreach ($get_videos as $video) {
+                $file_name  = $this->StoreVideo($video, 'public/Videos/Articles');
+                $article->videos()->create(['video' => $file_name]);
             }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
@@ -167,10 +174,13 @@ class ArticleController extends Controller
             $validated = $request->validated();
             $article = Article::findOrFail($id);
             $path = 'public/Articles';
-            foreach($article->images as $image){
-                $this->DeleteImage($path,$image);
-               }
-
+            foreach ($article->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
+            $path = 'public/Videos/Articles';
+            foreach ($article->videos as $video) {
+                $this->DeleteVideo($path, $video);
+            }
             $article->update([
                 'title' => $request->title ?? $article->title,
                 'summary' => $request->summary ?? $article->summary,
@@ -181,9 +191,14 @@ class ArticleController extends Controller
             $article->tags()->sync($request->tags);
 
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Articles');
-                $article->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Articles');
+                $article->images()->create(['url' => $file_name]);
+            }
+            $get_videos = $request->file('videos');
+            foreach ($get_videos as $video) {
+                $file_name  = $this->StoreVideo($video, 'public/Videos/Articles');
+                $article->videos()->create(['video' => $file_name]);
             }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
@@ -197,12 +212,16 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         try {
+            $path = 'public/Articles';
+            foreach ($article->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
+            $path = 'public/Videos/Articles';
+            foreach ($article->videos as $video) {
+                $this->DeleteVideo($path, $video);
+            }
             $article->tags()->detach();
             $article->delete();
-            $path = 'public/Articles';
-            foreach($article->images as $image){
-                $this->DeleteImage($path,$image);
-               }
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse(' delete not done');

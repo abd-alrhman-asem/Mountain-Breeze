@@ -18,6 +18,8 @@ use App\Http\Controllers\API\LanguageController;
 use App\Http\Controllers\API\RoomTypeController;
 use App\Http\Controllers\API\HelpCenterController;
 use App\Http\Controllers\API\FoodCategoryController;
+use App\Http\Controllers\API\ImageController;
+use App\Http\Controllers\API\VideoController;
 
 /*
 |--------------------------------------------------------------------------
@@ -71,7 +73,8 @@ Route::put('general_update/{id}',[GeneralController::class,'update'])->name('gen
 Route::apiResource('roomtypes',RoomTypeController::class);
 
 Route::apiResource('foodcategories',FoodCategoryController::class);
-
+Route::apiResource('videos',VideoController::class);
+Route::apiResource('images',ImageController::class);
 
 Route::apiResource('foods', FoodController::class);
 

@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\UploadImage;
+use App\Traits\UploadVideo;
 
 class Article extends Model
 {
     use HasFactory ;
-    use  SoftDeletes,UploadImage;
+    use  SoftDeletes,UploadImage,UploadVideo;
 
     protected $dates = ['deleted_at'];
 
