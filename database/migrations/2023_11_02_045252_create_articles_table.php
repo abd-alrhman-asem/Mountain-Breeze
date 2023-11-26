@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('summary');
             $table->text('description');
-            $table->boolean('lang');
+            $table->string('lang');
             $table->softDeletes();
             $table->timestamps();
         });

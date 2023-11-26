@@ -8,16 +8,14 @@ use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Http\Requests\StorePostRequest;
-use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\UpdatePostRequest;
-use App\Http\Resources\PostResource;
-use App\Models\Post;
 use Illuminate\Http\Request;
-use App\Traits\APIResponseTrait;
+use App\Traits\UploadVideo;
+
 
 class PostController extends Controller
 {
-    use APIResponseTrait,UploadImage ;
+    use APIResponseTrait, UploadImage, UploadVideo;
     /**
      * Display a listing of the resource.
      */
@@ -48,10 +46,17 @@ class PostController extends Controller
                 'lang'        => $request->lang,
                 'category_id' => $request->category_id,
             ]);
+
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Posts');
-                $post->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Posts');
+                $post->images()->create(['url' => $file_name , 'category_id'=>$request->category_id]);
+            }
+
+            $get_videos = $request->file('videos');
+            foreach ($get_videos as $video) {
+                $file_name  = $this->StoreVideo($video, 'public/Videos/Posts');
+                $post->videos()->create(['video' => $file_name,'category_id'=>$request->category_id]);
             }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
@@ -81,9 +86,13 @@ class PostController extends Controller
             $validated = $request->validated();
             $post = Post::findORFail($id);
             $path = 'public/Posts';
-            foreach($post->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($post->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
+            $path = 'public/Videos/Posts';
+            foreach ($post->videos as $video) {
+                $this->DeleteVideo($path, $video);
+            }
             $post->update([
                 'title'       => $request->title       ?? $post->title,
                 'summary'     => $request->summary     ?? $post->summary,
@@ -92,9 +101,14 @@ class PostController extends Controller
                 'category_id' => $request->category_id ?? $post->category_id,
             ]);
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,$path);
-                $post->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, $path);
+                $post->images()->create(['url' => $file_name]);
+            }
+            $get_videos = $request->file('videos');
+            foreach ($get_videos as $video) {
+                $file_name  = $this->StoreVideo($video, 'public/Videos/Posts');
+                $post->videos()->create(['video' => $file_name]);
             }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
@@ -110,9 +124,13 @@ class PostController extends Controller
         try {
             $post = Post::findORFail($id);
             $path = 'public/Posts';
-            foreach($post->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($post->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
+            $path = 'public/Videos/Posts';
+            foreach ($post->videos as $video) {
+                $this->DeleteVideo($path, $video);
+            }
             $post->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

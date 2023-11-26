@@ -11,9 +11,13 @@ class Image extends Model
 
     protected $fillable = [
         'url',
+        'category_id',
     ];
 
     public function imagable(){
         return $this->morphTo();
+    }
+    public function category(){
+        return $this->belongsTo(Category::class);
     }
 }
