@@ -7,6 +7,7 @@ use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use App\Models\Language;
 use App\Models\Tag;
 use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
@@ -28,6 +29,17 @@ class ArticleController extends Controller
      */
     public function index(Request $request)
     {
+        //test header request
+        $language = $request->header('language');
+        $name = Language::where('name','=',$language)->get();
+
+        //return $name;
+        $articles = Article::whereHas('langauges', function ($query) use ($name) {
+            $query->where('language_id','=',$name->id);
+        })->get();
+
+        return $articles;
+        //test header request 
         try {
             $articles = Article::paginate(9);
 
@@ -139,7 +151,7 @@ class ArticleController extends Controller
             $article->title = $request->title;
             $article->summary = $request->summary;
             $article->description = $request->description;
-            $article->lang = $request->lang;
+            $article->language_id = $request->language_id;
 
             $article->save();
 
@@ -195,7 +207,7 @@ class ArticleController extends Controller
                 'title' => $request->title ?? $article->title,
                 'summary' => $request->summary ?? $article->summary,
                 'description' => $request->description ?? $article->description,
-                'lang' => $request->lang ?? $article->lang,
+                'language_id' => $request->language_id ?? $article->language_id,
             ]);
 
             $article->tags()->sync($request->tags);

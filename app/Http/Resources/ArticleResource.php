@@ -19,6 +19,7 @@ class ArticleResource extends JsonResource
             'title' => $this->title,
             'summary'=> $this->summary,
             'description'=>$this->description,
+            'language'=> new LanguageResource($this->langauges),
             'created_at'=>$this->created_at,
             'images'     => $this->images,
             'videos'=> $this->videos,

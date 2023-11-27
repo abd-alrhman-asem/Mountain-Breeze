@@ -9,6 +9,10 @@ class Language extends Model
 {
     use HasFactory;
     protected $fillable =[
+        'id',
         'name',
     ];
+    public function articles(){
+        return $this->hasMany(Article::class);
+    }
 }
