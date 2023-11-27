@@ -28,7 +28,7 @@ class TagController extends Controller
             $tag = Tag::all();
             return $this->successResponse(TagResource::collection($tag));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no tag');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ class TagController extends Controller
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -83,7 +83,7 @@ class TagController extends Controller
             $tag = Tag::findOrFail($id);
             return $this->successResponse(new TagResource($tag));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no tag');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -103,7 +103,7 @@ class TagController extends Controller
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -118,7 +118,7 @@ class TagController extends Controller
             return $this->successResponse(new TagResource($tag));
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no tag to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

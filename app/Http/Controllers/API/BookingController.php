@@ -35,7 +35,7 @@ class BookingController extends Controller
 
             return $this->successResponse(BookingResource::collection($bookings));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no bookings');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -58,7 +58,7 @@ class BookingController extends Controller
             ]);
             return $this->successResponse(new BookingResource($booking));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -71,7 +71,7 @@ class BookingController extends Controller
             $booking = Booking::findOrFail($id);
             return $this->successResponse(new BookingResource($booking));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no booking');
+            return $this->FailResponse($th->getMessage());
         }
     }
     /**
@@ -84,7 +84,7 @@ class BookingController extends Controller
             $booking->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no booking to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

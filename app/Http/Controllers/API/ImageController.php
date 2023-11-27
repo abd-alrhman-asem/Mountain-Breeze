@@ -25,7 +25,7 @@ class ImageController extends Controller
             }
             return ImageResource::collection( $images) ;
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no  images');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -43,7 +43,7 @@ class ImageController extends Controller
             return new ImageResource($video);
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('create  not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 

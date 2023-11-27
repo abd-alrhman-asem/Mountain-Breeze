@@ -43,7 +43,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse('There are no articles');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -56,7 +56,7 @@ class ArticleController extends Controller
             $articles = Article::onlyTrashed()->get();
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse('There are no articles');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -66,16 +66,26 @@ class ArticleController extends Controller
     public function related_articles(string $id)
     {
         try {
-            $article = Article::findOrFail($id);
-
+            $article = Article::find($id);
+            if(!isset($article)){
+                return $this->FailResponse('there is no article for  this id ');
+            }
             $tags = $article->tags;
-
+            if($tags->isEmpty()){
+                return $this->FailResponse("this article has no tags");
+            }
             foreach ($tags as $tag) {
-                $related_articles = $tag->articles->all();
+              // $related_articles = $tag->articles->all();
+              $related_articles = Article::whereHas('tags',function($query) use ($article){
+                return $query->whereIn('name',$article->tags->pluck('name'));
+              })->where('id','!=',$article->id)->get();
+            }
+            if(!isset($related_articles)){
+                return $this->FailResponse("there is no article related ");
             }
             return $this->successResponse(ArticleResource::collection($related_articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse('There are no articles');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -148,7 +158,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse(' Create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -161,7 +171,7 @@ class ArticleController extends Controller
             $article = Article::findOrFail($id);
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse('There is no article');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -202,7 +212,7 @@ class ArticleController extends Controller
             }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse(' update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -212,6 +222,15 @@ class ArticleController extends Controller
     public function destroy(Article $article)
     {
         try {
+            $article->delete();
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th->getMessage());
+        }
+    }
+    public function forceDestroy(string $id){
+        try {
+            $article =Article::onlyTrashed()->find($id);
             $path = 'public/Articles';
             foreach ($article->images as $image) {
                 $this->DeleteImage($path, $image);
@@ -221,10 +240,10 @@ class ArticleController extends Controller
                 $this->DeleteVideo($path, $video);
             }
             $article->tags()->detach();
-            $article->delete();
+            Article::where('id','=',$id)->forceDelete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse(' delete not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

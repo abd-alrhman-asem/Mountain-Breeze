@@ -25,7 +25,7 @@ class VideoController extends Controller
             }
             return VideoResource::collection($videos) ;
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no videos');
+            return $this->FailResponse($th->getMessage());
         }
 
     }
@@ -44,7 +44,7 @@ class VideoController extends Controller
             return new VideoResource($video);
 
         } catch (\Throwable $th) {
-            return $this->FailResponse('create  not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 

@@ -21,7 +21,7 @@ class FoodCategoryController extends Controller
             $food_cat = FoodCategory::all();
             return $this->successResponse(FoodCategoryResource::collection($food_cat));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no food categories');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -39,7 +39,7 @@ class FoodCategoryController extends Controller
             ]);
             return $this->successResponse(new FoodCategoryResource($food_cat));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -52,7 +52,7 @@ class FoodCategoryController extends Controller
             $food_cat = FoodCategory::findOrFail($id);
             return $this->successResponse(new FoodCategoryResource($food_cat));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no food category');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -72,7 +72,7 @@ class FoodCategoryController extends Controller
 
             return $this->successResponse(new FoodCategoryResource($food_cat));
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ class FoodCategoryController extends Controller
             $food_cat->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no food category to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

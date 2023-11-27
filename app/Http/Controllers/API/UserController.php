@@ -21,7 +21,7 @@ class UserController extends Controller
             $users = User::all();
             return $this->successResponse(UserResource::collection($users));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no users');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -40,7 +40,7 @@ class UserController extends Controller
             ]);
             return $this->successResponse(new UserResource($user));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -53,7 +53,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             return $this->successResponse(new UserResource($user));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no user');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -73,7 +73,7 @@ class UserController extends Controller
             ]);
             return $this->successResponse(new UserResource($user));
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -87,7 +87,7 @@ class UserController extends Controller
             $user->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no user to delete');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }

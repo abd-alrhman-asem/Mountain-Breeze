@@ -25,7 +25,7 @@ class CategoryController extends Controller
             ->get();
             return $this->successResponse(CategoryResource::collection($categories));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there are no categories ');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -48,7 +48,7 @@ class CategoryController extends Controller
             }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
-            return $this->FailResponse('create not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ class CategoryController extends Controller
             $category = Category::findOrFail($id);
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no category ');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -89,7 +89,7 @@ class CategoryController extends Controller
             }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
-            return $this->FailResponse('update not done');
+            return $this->FailResponse($th->getMessage());
         }
     }
 
@@ -107,7 +107,7 @@ class CategoryController extends Controller
             $category->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {
-            return $this->FailResponse('there is no category to delete ');
+            return $this->FailResponse($th->getMessage());
         }
     }
 }
