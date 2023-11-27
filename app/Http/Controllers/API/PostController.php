@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Post;
+use App\Models\Language;
 use App\Traits\UploadImage;
+use App\Traits\UploadVideo;
+use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\PostResource;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
-use Illuminate\Http\Request;
-use App\Traits\UploadVideo;
 
 
 class PostController extends Controller
@@ -25,6 +26,14 @@ class PostController extends Controller
             $posts = Post::all();
             if ($request->has('category_id')) {
                 $posts = Post::where('category_id', '=', $request->category_id)->get();
+            }
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $posts = Post::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
             }
             return $this->successResponse(PostResource::collection($posts));
         } catch (\Throwable $th) {
@@ -43,20 +52,20 @@ class PostController extends Controller
                 'title'       => $request->title,
                 'summary'     => $request->summary,
                 'description' => $request->description,
-                'lang'        => $request->lang,
+                'language_id' => $request->language_id,
                 'category_id' => $request->category_id,
             ]);
 
             $get_images = $request->file('images');
             foreach ($get_images as $image) {
                 $file_name  = $this->StoreImage($image, 'public/Posts');
-                $post->images()->create(['url' => $file_name , 'category_id'=>$request->category_id]);
+                $post->images()->create(['url' => $file_name, 'category_id' => $request->category_id]);
             }
 
             $get_videos = $request->file('videos');
             foreach ($get_videos as $video) {
                 $file_name  = $this->StoreVideo($video, 'public/Videos/Posts');
-                $post->videos()->create(['video' => $file_name,'category_id'=>$request->category_id]);
+                $post->videos()->create(['video' => $file_name, 'category_id' => $request->category_id]);
             }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
@@ -67,10 +76,21 @@ class PostController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $post = Post::findORFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $post->language_id) {
+                    $post = Post::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new PostResource($post));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -97,7 +117,7 @@ class PostController extends Controller
                 'title'       => $request->title       ?? $post->title,
                 'summary'     => $request->summary     ?? $post->summary,
                 'description' => $request->description ?? $post->description,
-                'lang'        => $request->lang        ?? $post->lang,
+                'language_id' => $request->language_id           ?? $post->language_id,
                 'category_id' => $request->category_id ?? $post->category_id,
             ]);
             $get_images = $request->file('images');

@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->unsignedBigInteger('category_id')->nullable();
             $table->foreign('category_id')->references('id')->on('categories');
             $table->string('name');
             $table->string('summary');
-            $table->string('lang');
             $table->timestamps();
         });
     }

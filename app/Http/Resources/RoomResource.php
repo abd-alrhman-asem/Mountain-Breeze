@@ -21,6 +21,7 @@ class RoomResource extends JsonResource
             'price_per_night'=>$this->price_per_night,
             'guest_number'   =>$this->guest_number,
             'location'       =>$this->location,
+            'language'=> new LanguageResource($this->langauges),
             'room_type_id'   => new RoomTypeResource($this->types),
             'services'       => ServiceResource::collection($this->services),
             'images'     => $this->images,

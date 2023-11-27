@@ -17,9 +17,9 @@ class CategoryResource extends JsonResource
         return [
             'name'=>$this->name,
             'summary'=>$this->summary,
+            'language'=> new LanguageResource($this->langauges),
             'childern_categories'=>CategoryResource::collection($this->subCategories),
             'posts'=> PostResource::collection($this->posts),
-
             'images' => $this->images,
         ];
     }

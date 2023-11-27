@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Language;
+use App\Models\FoodCategory;
+use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\FoodCategoryResource;
 use App\Http\Requests\StoreFoodCategoryRequest;
 use App\Http\Requests\UpdateFoodCategoryRequest;
-use App\Http\Resources\FoodCategoryResource;
-use App\Models\FoodCategory;
-use App\Traits\APIResponseTrait;
 
 class FoodCategoryController extends Controller
 {
@@ -15,10 +17,18 @@ class FoodCategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $food_cat = FoodCategory::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $food_cat = FoodCategory::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
             return $this->successResponse(FoodCategoryResource::collection($food_cat));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -33,9 +43,9 @@ class FoodCategoryController extends Controller
         try {
             $validated = $request->validated();
             $food_cat = FoodCategory::create([
-                'name' =>$request->name,
-                'summary'=> $request->summary,
-                'lang' =>$request->lang,
+                'name' => $request->name,
+                'summary' => $request->summary,
+                'language_id' => $request->language_id,
             ]);
             return $this->successResponse(new FoodCategoryResource($food_cat));
         } catch (\Throwable $th) {
@@ -46,10 +56,21 @@ class FoodCategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $food_cat = FoodCategory::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $food_cat->language_id) {
+                    $food_cat = FoodCategory::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new FoodCategoryResource($food_cat));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -65,9 +86,9 @@ class FoodCategoryController extends Controller
             $validated = $request->validated();
             $food_cat = FoodCategory::findOrFail($id);
             $food_cat->update([
-                'name' => $request->name ??$food_cat->name,
-                'summary' => $request->summary??$food_cat->summary,
-                'lang' => $request->lang??$food_cat->lang,
+                'name' => $request->name ?? $food_cat->name,
+                'summary' => $request->summary ?? $food_cat->summary,
+                'language_id' => $request->language_id ?? $food_cat->language_id,
             ]);
 
             return $this->successResponse(new FoodCategoryResource($food_cat));

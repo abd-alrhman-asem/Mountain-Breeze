@@ -12,7 +12,11 @@ class General extends Model
     protected $fillable = [
         'name',
         'value',
-        'lang',
+        'language_id',
         'icon',
     ];
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
+    }
 }

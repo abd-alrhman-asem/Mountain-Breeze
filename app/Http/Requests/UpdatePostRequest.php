@@ -25,7 +25,7 @@ class UpdatePostRequest extends FormRequest
             'title'      =>'required|string',
             'summary'    =>'required|string',
             'description'=>'required|string',
-            'lang'       =>'required|string',
+            'language_id'=>'required|integer|exists:languages,id',
             'category_id'=>'required|integer',
         ];
     }

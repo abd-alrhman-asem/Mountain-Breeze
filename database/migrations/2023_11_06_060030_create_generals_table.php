@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('generals', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->string('name');
             $table->string('value');
-            $table->string('lang');
             $table->timestamps();
         });
     }

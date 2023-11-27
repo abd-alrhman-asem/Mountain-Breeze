@@ -2,24 +2,34 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Service;
+use App\Models\Language;
+use App\Traits\UploadImage;
+use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ServiceResource;
 use App\Http\Requests\StoreServiceRequest;
 use App\Http\Requests\UpdateServiceRequest;
-use App\Http\Resources\ServiceResource;
-use App\Models\Service;
-use App\Traits\APIResponseTrait;
-use App\Traits\UploadImage;
 
 class ServiceController extends Controller
 {
-    use APIResponseTrait,UploadImage;
+    use APIResponseTrait, UploadImage;
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $service = Service::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $service = Service::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
             return $this->successResponse(ServiceResource::collection($service));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -34,19 +44,18 @@ class ServiceController extends Controller
         try {
             $validated = $request->validated();
 
-           $service = Service::create([
-            'name'=>$request->name,
-            'lang'=>$request->lang,
-           ]);
+            $service = Service::create([
+                'name' => $request->name,
+                'language_id' => $request->language_id,
+            ]);
 
-           $get_images = $request->file('images');
-           foreach($get_images as $image){
-               $file_name  = $this->StoreImage($image,'public/Services');
-               $service->images()->create(['url'=>$file_name]);
-           }
+            $get_images = $request->file('images');
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Services');
+                $service->images()->create(['url' => $file_name]);
+            }
 
             return $this->successResponse(new ServiceResource($service));
-
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -55,10 +64,21 @@ class ServiceController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $service = Service::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $service->language_id) {
+                    $service = Service::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new ServiceResource($service));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -74,23 +94,22 @@ class ServiceController extends Controller
             $validated = $request->validated();
             $service = Service::findOrFail($id);
             $path = 'public/Services';
-            foreach($service->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($service->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
 
-           $service = Service::create([
-            'name'=>$request->name??$service->name,
-            'lang'=>$request->lang??$service->lang,
-           ]);
+            $service = Service::create([
+                'name' => $request->name ?? $service->name,
+                'language_id' => $request->language_id ?? $service->language_id,
+            ]);
 
-           $get_images = $request->file('images');
-           foreach($get_images as $image){
-               $file_name  = $this->StoreImage($image,'public/Services');
-               $service->images()->create(['url'=>$file_name]);
-           }
+            $get_images = $request->file('images');
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Services');
+                $service->images()->create(['url' => $file_name]);
+            }
 
             return $this->successResponse(new ServiceResource($service));
-
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -104,9 +123,9 @@ class ServiceController extends Controller
         try {
             $service = Service::findOrFail($id);
             $path = 'public/Services';
-            foreach($service->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($service->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
             $service->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

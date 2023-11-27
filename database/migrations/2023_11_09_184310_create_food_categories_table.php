@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('food_categories', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->string('name');
             $table->string('summary');
-            $table->string('lang');
             $table->timestamps();
         });
     }

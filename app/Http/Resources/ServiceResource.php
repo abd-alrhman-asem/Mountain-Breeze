@@ -16,6 +16,7 @@ class ServiceResource extends JsonResource
     {
         return [
             'name' => $this->name,
+            'language'=> new LanguageResource($this->langauges),
             'images'     => $this->images,
         ];
     }

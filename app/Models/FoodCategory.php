@@ -12,10 +12,14 @@ class FoodCategory extends Model
     protected $fillable = [
         'name',
         'summary',
-        'lang',
+        'language_id',
     ];
 
     public function foods(){
         return $this->hasMany(Food::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 }

@@ -13,7 +13,7 @@ class Tag extends Model
     protected $fillable = [
         'id',
         'name',
-        'lang',
+        'language_id',
     ];
 
         /**
@@ -23,5 +23,9 @@ class Tag extends Model
     public function articles()
     {
         return $this->belongsToMany(Article::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 }

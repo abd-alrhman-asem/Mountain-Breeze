@@ -2,27 +2,36 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Category;
+use App\Models\Language;
+use App\Traits\UploadImage;
+use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryResource;
 use App\Http\Requests\StoreCategoryRequest;
 use App\Http\Requests\UpdateCategoryRequest;
-use App\Http\Resources\CategoryResource;
-use App\Models\Category;
-use App\Traits\APIResponseTrait;
-use App\Traits\UploadImage;
 
 class CategoryController extends Controller
 {
-    use APIResponseTrait,UploadImage;
+    use APIResponseTrait, UploadImage;
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             //$categories = Category::all();
-            $categories = Category::whereNull('category_id')
-            ->with('subCategories')
-            ->get();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $categories = Category::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id)
+                        ->whereNull('category_id')
+                        ->with('subCategories');
+                })->get();
+            }
             return $this->successResponse(CategoryResource::collection($categories));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -36,15 +45,15 @@ class CategoryController extends Controller
     {
         try {
             $category = Category::create([
-                'name'       => $request->name,
-                'summary'    =>$request->summary,
-                'lang'       =>$request->lang,
-                'category_id'=>$request->category_id,
+                'name'        => $request->name,
+                'summary'     => $request->summary,
+                'language_id' => $request->language_id,
+                'category_id' => $request->category_id,
             ]);
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Category');
-                $category->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Category');
+                $category->images()->create(['url' => $file_name]);
             }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
@@ -55,10 +64,23 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $category = Category::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $category->language_id) {
+                    $category = Category::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id)
+                            ->whereNull('category_id')
+                            ->with('subCategories');
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -73,19 +95,19 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             $path = 'public/Category';
-            foreach($category->images as $image){
-                $this->DeleteImage($path,$image);
-               }
-            $category ->update([
-                'name'       => $request->name       ??$category->name,
-                'summary'    => $request->summary    ??$category->summary,
-                'lang'       => $request->lang       ??$category->lang,
-                'category_id'=> $request->category_id??$category->category_id,
+            foreach ($category->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
+            $category->update([
+                'name'       => $request->name       ?? $category->name,
+                'summary'    => $request->summary    ?? $category->summary,
+                'language_id' => $request->language_id      ?? $category->language_id,
+                'category_id' => $request->category_id ?? $category->category_id,
             ]);
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Category');
-                $category->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Category');
+                $category->images()->create(['url' => $file_name]);
             }
             return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
@@ -101,9 +123,9 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             $path = 'public/Category';
-            foreach($category->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($category->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
             $category->delete();
             return $this->successResponse();
         } catch (\Throwable $th) {

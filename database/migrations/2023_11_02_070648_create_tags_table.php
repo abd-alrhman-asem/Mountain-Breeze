@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tags', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->string('name');
-            $table->string('lang');
             $table->timestamps();
         });
     }

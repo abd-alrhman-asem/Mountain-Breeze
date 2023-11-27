@@ -22,6 +22,7 @@ class PostResource extends JsonResource
             'images'      => $this->images,
             'videos'      => $this->videos,
             'created_at'  =>$this->created_at,
+            'language'=> new LanguageResource($this->langauges),
             //'category'    =>new CategoryResource($this->category),
         ];
     }

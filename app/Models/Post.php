@@ -15,12 +15,16 @@ class Post extends Model
         'title',
         'summary',
         'description',
-        'lang',
+        'language_id',
         'category_id'
     ];
 
     public function category(){
         return $this->belongsTo(Category::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 
 }

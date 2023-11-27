@@ -24,7 +24,7 @@ class StoreTagRequest extends FormRequest
         //dd($this->all());
         return [
             'name'=>'required|string',
-            'lang'=>'string',
+            'language_id'=>'required|integer|exists:languages,id',
         ];
     }
 }
