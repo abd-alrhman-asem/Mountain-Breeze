@@ -28,6 +28,7 @@ class UpdateRoomRequest extends FormRequest
             'price_per_night' => 'required|integer',
             'guest_number'   => 'required|integer',
             'location'       => 'required|string',
+            'language_id'=>'required|integer|exists:languages,id',
             'room_type_id'   => 'required|integer|exists:room_types,id',
         ];
     }

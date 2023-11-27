@@ -3,52 +3,69 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Room;
+use App\Models\Language;
+use App\Traits\UploadImage;
 use Illuminate\Http\Request;
+use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RoomResource;
 use App\Http\Requests\StoreRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
-use App\Http\Resources\RoomResource;
-use App\Traits\APIResponseTrait;
-use App\Traits\UploadImage;
 
 class RoomController extends Controller
 {
-    use APIResponseTrait,UploadImage;
+    use APIResponseTrait, UploadImage;
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
         try {
-           $rooms = Room::all();
+            $rooms = Room::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
 
-           if ($request->has('price')) {
-            $rooms = Room::where('price_per_night', '=', $request->price)->get();
-           }
-           if ($request->has('location')) {
-            $rooms = Room::where('location', '=', $request->location)->get();
-           }
+                $rooms = Room::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
 
-           if ($request->has('guest_number')) {
-            $rooms = Room::where('guest_number', '=', $request->guest_number)->get();
-           }
+            if ($request->has('price')) {
+                $rooms = Room::where('price_per_night', '=', $request->price)->get();
+            }
+            if ($request->has('location')) {
+                $rooms = Room::where('location', '=', $request->location)->get();
+            }
 
-           if ($request->has('room_type_id')) {
-            $rooms = Room::where('room_type_id', '=', $request->room_type_id)->get();
-           }
+            if ($request->has('guest_number')) {
+                $rooms = Room::where('guest_number', '=', $request->guest_number)->get();
+            }
+
+            if ($request->has('room_type_id')) {
+                $rooms = Room::where('room_type_id', '=', $request->room_type_id)->get();
+            }
 
             return $this->successResponse(RoomResource::collection($rooms));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
     }
-        /**
+    /**
      * Display a listing of the resource.
      */
-    public function deleted_rooms()
+    public function deleted_rooms(Request $request)
     {
         try {
-           $rooms = Room::onlyTrashed()->get();
+            $rooms = Room::onlyTrashed()->get();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $rooms = Room::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
             return $this->successResponse(RoomResource::collection($rooms));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -66,37 +83,49 @@ class RoomController extends Controller
                 'name'           => $request->name,
                 'description'    => $request->description,
                 'summary'        => $request->summary,
-                'price_per_night'=> $request->price_per_night,
+                'price_per_night' => $request->price_per_night,
                 'guest_number'   => $request->guest_number,
                 'location'       => $request->location,
                 'room_type_id'   => $request->room_type_id,
+                'language_id' => $request->language_id,
             ]);
 
             $room->services()->attach($request->services);
 
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Rooms');
-                $room->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Rooms');
+                $room->images()->create(['url' => $file_name]);
             }
 
-             return $this->successResponse(new RoomResource($room));
-         } catch (\Throwable $th) {
-             return $this->FailResponse($th->getMessage());
-         }
+            return $this->successResponse(new RoomResource($room));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th->getMessage());
+        }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $room = Room::findOrFail($id);
-             return $this->successResponse(new RoomResource($room));
-         } catch (\Throwable $th) {
-             return $this->FailResponse($th->getMessage());
-         }
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $room->language_id) {
+                    $room = Room::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
+            return $this->successResponse(new RoomResource($room));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th->getMessage());
+        }
     }
 
     /**
@@ -108,28 +137,29 @@ class RoomController extends Controller
             $validate = $request->validated();
             $room = Room::findOrFail($id);
             $path = 'public/Rooms';
-            foreach($room->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($room->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
             $room->update([
-                'name'           => $request->name           ??$room->name,
-                'description'    => $request->description    ??$room->description,
-                'summary'        => $request->summary        ??$room->summary,
-                'price_per_night'=> $request->price_per_night??$room->price_per_night,
-                'guest_number'   => $request->guest_number   ??$room->guest_number,
-                'location'       => $request->location       ??$room->location,
-                'room_type_id'   => $request->room_type_id   ??$room->room_type_id,
+                'name'           => $request->name           ?? $room->name,
+                'description'    => $request->description    ?? $room->description,
+                'summary'        => $request->summary        ?? $room->summary,
+                'price_per_night' => $request->price_per_night ?? $room->price_per_night,
+                'guest_number'   => $request->guest_number   ?? $room->guest_number,
+                'location'       => $request->location       ?? $room->location,
+                'room_type_id'   => $request->room_type_id   ?? $room->room_type_id,
+                'language_id'    => $request->language_id    ?? $room->language_id,
             ]);
             $room->services()->sync($request->services);
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/Rooms');
-                $room->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name  = $this->StoreImage($image, 'public/Rooms');
+                $room->images()->create(['url' => $file_name]);
             }
-             return $this->successResponse(new RoomResource($room));
-         } catch (\Throwable $th) {
-             return $this->FailResponse($th->getMessage());
-         }
+            return $this->successResponse(new RoomResource($room));
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th->getMessage());
+        }
     }
 
     /**
@@ -140,14 +170,14 @@ class RoomController extends Controller
         try {
             $room = Room::findOrFail($id);
             $path = 'public/Rooms';
-            foreach($room->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            foreach ($room->images as $image) {
+                $this->DeleteImage($path, $image);
+            }
             $room->services()->detach();
             $room->delete();
-             return $this->successResponse();
-         } catch (\Throwable $th) {
-             return $this->FailResponse($th->getMessage());
-         }
+            return $this->successResponse();
+        } catch (\Throwable $th) {
+            return $this->FailResponse($th->getMessage());
+        }
     }
 }

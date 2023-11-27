@@ -16,6 +16,7 @@ class RoomTypeResource extends JsonResource
     {
         return [
             'name' => $this->name,
+            'language'=> new LanguageResource($this->langauges),
         ];
     }
 }

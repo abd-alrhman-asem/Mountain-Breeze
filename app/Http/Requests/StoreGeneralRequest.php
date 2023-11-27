@@ -24,7 +24,7 @@ class StoreGeneralRequest extends FormRequest
         return [
             'name'=>'required|string',
             'value'=>'required|string',
-            'lang'=>'required|string',
+            'language_id'=>'required|integer|exists:languages,id',
             'icon'=>'image'
 
         ];

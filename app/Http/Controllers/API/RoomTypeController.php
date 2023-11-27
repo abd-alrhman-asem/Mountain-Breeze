@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Models\Language;
 use App\Models\RoomType;
+use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\RoomTypeResource;
 use App\Http\Requests\StoreRoomTypeRequest;
 use App\Http\Requests\UpdateRoomTypeRequest;
-use App\Http\Resources\RoomTypeResource;
 
 class RoomTypeController extends Controller
 {
@@ -15,10 +17,18 @@ class RoomTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $type = RoomType::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $type = RoomType::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
             return $this->successResponse(RoomTypeResource::collection($type));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -34,7 +44,7 @@ class RoomTypeController extends Controller
             $validated = $request->validated();
             $roomType = RoomType::create([
                 'name' => $request->name,
-                'lang' => $request->lang,
+                'language_id' => $request->language_id,
             ]);
             return $this->successResponse(new RoomTypeResource($roomType));
         } catch (\Throwable $th) {
@@ -45,10 +55,21 @@ class RoomTypeController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $type = RoomType::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $type->language_id) {
+                    $type = RoomType::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new RoomTypeResource($type));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -65,7 +86,7 @@ class RoomTypeController extends Controller
             $roomType = RoomType::findOrFail($id);
             $roomType->update([
                 'name' => $request->name ?? $roomType->name,
-                'lang' => $request->lang ?? $roomType->lang,
+                'language_id' => $request->language_id ?? $roomType->language_id,
             ]);
             return $this->successResponse(new RoomTypeResource($roomType));
         } catch (\Throwable $th) {

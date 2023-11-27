@@ -7,6 +7,7 @@ use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Resources\ArticleResource;
 use App\Models\Article;
+use App\Models\Language;
 use App\Models\Tag;
 use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
@@ -31,6 +32,15 @@ class ArticleController extends Controller
         try {
             $articles = Article::paginate(9);
 
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $articles = Article::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->paginate(9);
+            }
+
             if ($request->has('created_at')) {
                 $articles = Article::where('created_at', '=', $request->created_at)->paginate(9);
             }
@@ -50,10 +60,17 @@ class ArticleController extends Controller
     /**
      * Display a listing of the deleted resource.
      */
-    public function deleted_articles()
+    public function deleted_articles(Request $request)
     {
         try {
-            $articles = Article::onlyTrashed()->get();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $articles = Article::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->onlyTrashed()->get();
+            }
             return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -63,27 +80,28 @@ class ArticleController extends Controller
     /**
      * Display related articles
      */
-    public function related_articles(string $id)
+    public function related_articles(Request $request)
     {
         try {
-            $article = Article::find($id);
-            if(!isset($article)){
+            $article = Article::find($request->id);
+            if (!isset($article)) {
                 return $this->FailResponse('there is no article for  this id ');
             }
             $tags = $article->tags;
-            if($tags->isEmpty()){
+            if ($tags->isEmpty()) {
                 return $this->FailResponse("this article has no tags");
             }
-            foreach ($tags as $tag) {
-              // $related_articles = $tag->articles->all();
-              $related_articles = Article::whereHas('tags',function($query) use ($article){
-                return $query->whereIn('name',$article->tags->pluck('name'));
-              })->where('id','!=',$article->id)->get();
-            }
-            if(!isset($related_articles)){
+
+            $articles = Article::whereHas('tags', function ($query) use ($article) {
+                return $query->whereIn('name', $article->tags->pluck('name'));
+            })->where('language_id', '=', $article->language_id)
+                ->where('id', '!=', $article->id)->get();
+
+
+            if ($articles->isEmpty()) {
                 return $this->FailResponse("there is no article related ");
             }
-            return $this->successResponse(ArticleResource::collection($related_articles));
+            return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -139,7 +157,7 @@ class ArticleController extends Controller
             $article->title = $request->title;
             $article->summary = $request->summary;
             $article->description = $request->description;
-            $article->lang = $request->lang;
+            $article->language_id = $request->language_id;
 
             $article->save();
 
@@ -165,10 +183,23 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $article = Article::findOrFail($id);
+
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                //return [$name->id , $article->language_id];
+                if ($language->id == $article->language_id) {
+                    $article = Article::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->where('id', '=', $id)->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -195,7 +226,7 @@ class ArticleController extends Controller
                 'title' => $request->title ?? $article->title,
                 'summary' => $request->summary ?? $article->summary,
                 'description' => $request->description ?? $article->description,
-                'lang' => $request->lang ?? $article->lang,
+                'language_id' => $request->language_id ?? $article->language_id,
             ]);
 
             $article->tags()->sync($request->tags);
@@ -228,9 +259,10 @@ class ArticleController extends Controller
             return $this->FailResponse($th->getMessage());
         }
     }
-    public function forceDestroy(string $id){
+    public function forceDestroy(string $id)
+    {
         try {
-            $article =Article::onlyTrashed()->find($id);
+            $article = Article::onlyTrashed()->find($id);
             $path = 'public/Articles';
             foreach ($article->images as $image) {
                 $this->DeleteImage($path, $image);
@@ -240,7 +272,7 @@ class ArticleController extends Controller
                 $this->DeleteVideo($path, $video);
             }
             $article->tags()->detach();
-            Article::where('id','=',$id)->forceDelete();
+            Article::where('id', '=', $id)->forceDelete();
             return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());

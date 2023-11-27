@@ -10,6 +10,10 @@ class RoomType extends Model
     use HasFactory;
     protected $fillable = [
         'name',
-        'lang',
+        'language_id',
     ];
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
+    }
 }

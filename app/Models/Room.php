@@ -19,6 +19,7 @@ class Room extends Model
         'guest_number',
         'location',
         'room_type_id',
+        'language_id',
     ];
 
     public function types(){
@@ -32,5 +33,9 @@ class Room extends Model
     public function services()
     {
         return $this->belongsToMany(Service::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 }

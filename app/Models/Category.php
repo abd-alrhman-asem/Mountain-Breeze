@@ -14,7 +14,7 @@ class Category extends Model
         'category_id',
         'name',
         'summary',
-        'lang',
+        'language_id',
     ];
 
     public function categories(){
@@ -35,5 +35,9 @@ class Category extends Model
 
     public function images(){
         return $this->hasMany(Image::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 }

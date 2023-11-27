@@ -12,7 +12,7 @@ class Service extends Model
 
     protected $fillable = [
         'name',
-        'lang',
+        'language_id',
     ];
 
     /**
@@ -22,5 +22,9 @@ class Service extends Model
     public function rooms()
     {
         return $this->belongsToMany(Room::class);
+    }
+    public function langauges()
+    {
+        return $this->belongsTo(Language::class,'language_id','id');
     }
 }

@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Tag;
+use App\Models\Language;
+use App\Traits\APIResponseTrait;
 use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
-use App\Traits\APIResponseTrait;
+use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
@@ -15,17 +17,25 @@ class TagController extends Controller
     /**
      * Display a listing of the resource.
      */
-      /**
+    /**
      * @OA\Get(
      *     path="/api/tags",
      *     summary="Get tags details",
      *     @OA\Response(response="200", description="Success"),
      * )
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $tag = Tag::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $tag = Tag::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->paginate(9);
+            }
             return $this->successResponse(TagResource::collection($tag));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -35,7 +45,7 @@ class TagController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-        /**
+    /**
      * @OA\Post(
      *     path="/api/tags",
      *     summary="Create a new tag",
@@ -62,13 +72,12 @@ class TagController extends Controller
         try {
             $validated = $request->validated();
 
-           $tag = Tag::create([
-            'name'=>$request->name,
-            'lang'=>$request->lang,
-           ]);
+            $tag = Tag::create([
+                'name' => $request->name,
+                'language_id' => $request->language_id,
+            ]);
 
             return $this->successResponse(new TagResource($tag));
-
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -77,10 +86,21 @@ class TagController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $tag = Tag::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $tag->language_id) {
+                    $tag = Tag::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new TagResource($tag));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -98,10 +118,9 @@ class TagController extends Controller
 
             $tag->update([
                 'name' => $request->name ?? $tag->name,
-                'lang' => $request->lang ?? $tag->lang,
+                'language_id' => $request->language_id ?? $tag->language_id,
             ]);
             return $this->successResponse(new TagResource($tag));
-
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -116,7 +135,6 @@ class TagController extends Controller
             $tag = Tag::findOrFail($id);
             $tag->delete();
             return $this->successResponse(new TagResource($tag));
-
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

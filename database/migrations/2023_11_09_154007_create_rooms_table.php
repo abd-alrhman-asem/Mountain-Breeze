@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('rooms', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->foreignId('room_type_id')->references('id')->on('room_types');
             $table->string('name');
             $table->text('description');

@@ -17,6 +17,7 @@ class FoodCategoryResource extends JsonResource
         return [
             'name'   =>$this->name,
             'summary'=>$this->summary,
+            'language'=> new LanguageResource($this->langauges),
             'foods'  =>FoodResource::collection($this->foods),
         ];
     }

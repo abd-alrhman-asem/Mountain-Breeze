@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('food', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->foreignId('food_category_id')->references('id')->on('food_categories');
             $table->string('title');
             $table->text('description');
-            $table->string('lang');
             $table->timestamps();
         });
     }

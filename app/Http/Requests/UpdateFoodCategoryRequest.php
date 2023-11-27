@@ -24,7 +24,7 @@ class UpdateFoodCategoryRequest extends FormRequest
         return [
             'name'   =>'required|string',
             'summary'=>'required|string',
-            'lang'   =>'required|string',
+            'language_id'=>'required|integer|exists:languages,id',
         ];
     }
 }

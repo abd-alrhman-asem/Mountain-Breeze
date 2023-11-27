@@ -22,9 +22,9 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>'required|string',
-            'summary'=>'required|string',
-            'lang'=>'required|string',
+            'name'       =>'required|string',
+            'summary'    =>'required|string',
+            'language_id'=>'required|integer|exists:languages,id',
             'category_id'=>'integer|nullable'
         ];
     }

@@ -23,7 +23,7 @@ class StoreServiceRequest extends FormRequest
     {
         return [
             'name'=>'required|string',
-            'lang'=>'string|required',
+            'language_id'=>'required|integer|exists:languages,id',
         ];
     }
 }

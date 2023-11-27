@@ -17,6 +17,7 @@ class FoodResource extends JsonResource
         return [
             'title'=>$this->title,
             'description'=>$this->description,
+            'language'=> new LanguageResource($this->langauges),
             'images' => $this->images,
         ];
     }

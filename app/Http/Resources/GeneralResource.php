@@ -18,6 +18,7 @@ class GeneralResource extends JsonResource
             'name' => $this->name,
             'value'=>$this->value,
             'icon'=>$this->icon,
+            'language'=> new LanguageResource($this->langauges),
         ];
     }
 }

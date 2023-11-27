@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('articles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('language_id')->references('id')->on('languages');
             $table->string('title');
             $table->string('summary');
             $table->text('description');
-            $table->string('lang');
             $table->softDeletes();
             $table->timestamps();
         });

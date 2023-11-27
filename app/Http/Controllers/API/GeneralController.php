@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\General;
+use App\Models\Language;
+use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\GeneralResource;
@@ -16,10 +18,18 @@ class GeneralController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
             $information = General::all();
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+
+                $information = General::whereHas('langauges', function ($query) use ($language) {
+                    $query->where('language_id', '=', $language->id);
+                })->get();
+            }
             return $this->successResponse(GeneralResource::collection($information));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -37,7 +47,7 @@ class GeneralController extends Controller
             $information =   General::create([
                 'name' => $request->name,
                 'value' => $request->value,
-                'lang' => $request->lang,
+                'language_id' => $request->language_id,
             ]);
             if ($request->hasFile('icon')) {
                 $icon = $request->file('icon');
@@ -56,10 +66,21 @@ class GeneralController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id, Request $request)
     {
         try {
             $information = General::findOrFail($id);
+            if ($request->header('language')) {
+                $language_header = $request->header('language');
+                $language = Language::where('name', '=', $language_header)->first();
+                if ($language->id == $information->language_id) {
+                    $information = General::whereHas('langauges', function ($query) use ($language) {
+                        $query->where('language_id', '=', $language->id);
+                    })->first();
+                } else {
+                    return $this->FailResponse('go out');
+                }
+            }
             return $this->successResponse(new GeneralResource($information));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
@@ -71,7 +92,7 @@ class GeneralController extends Controller
      */
     public function update(UpdateGeneralRequest $request, string $id)
     {
-        try{
+        try {
             $general = General::findOrFail($id);
 
             if ($request->has('icon')) {
@@ -84,7 +105,7 @@ class GeneralController extends Controller
             $general->update([
                 'name' => $request->name,
                 'value' => $request->value,
-                'lang' => $request->lang,
+                'language_id' => $request->language_id,
                 'icon' => $filename,
             ]);
             return $this->successResponse(new GeneralResource($general));
