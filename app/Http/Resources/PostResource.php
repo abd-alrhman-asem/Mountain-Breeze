@@ -19,10 +19,10 @@ class PostResource extends JsonResource
             'title'       =>$this->title,
             'summary'     =>$this->summary,
             'description' =>$this->description,
-            'images'      => $this->images,
-            'videos'      => $this->videos,
+            'images'      => $this->images->pluck('url'),
+            'videos'      => $this->videos->pluck('video'),
             'created_at'  =>$this->created_at,
-            'language'=> new LanguageResource($this->langauges),
+            'language'=> $this->langauges->name,
             //'category'    =>new CategoryResource($this->category),
         ];
     }

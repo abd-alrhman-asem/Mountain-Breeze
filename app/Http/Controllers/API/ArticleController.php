@@ -80,10 +80,9 @@ class ArticleController extends Controller
     /**
      * Display related articles
      */
-    public function related_articles(Request $request)
+    public function related_articles(Article $article)
     {
         try {
-            $article = Article::find($request->id);
             if (!isset($article)) {
                 return $this->FailResponse('there is no article for  this id ');
             }
@@ -174,7 +173,8 @@ class ArticleController extends Controller
                 $file_name  = $this->StoreVideo($video, 'public/Videos/Articles');
                 $article->videos()->create(['video' => $file_name]);
             }
-            return $this->successResponse(new ArticleResource($article));
+            //return $article;
+           return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -183,19 +183,17 @@ class ArticleController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, Request $request)
+    public function show(Article $article, Request $request)
     {
         try {
-            $article = Article::findOrFail($id);
 
             if ($request->header('language')) {
                 $language_header = $request->header('language');
                 $language = Language::where('name', '=', $language_header)->first();
-                //return [$name->id , $article->language_id];
                 if ($language->id == $article->language_id) {
                     $article = Article::whereHas('langauges', function ($query) use ($language) {
                         $query->where('language_id', '=', $language->id);
-                    })->where('id', '=', $id)->first();
+                    })->where('id', '=', $article->id)->first();
                 } else {
                     return $this->FailResponse('go out');
                 }
@@ -263,6 +261,10 @@ class ArticleController extends Controller
     {
         try {
             $article = Article::onlyTrashed()->find($id);
+
+            if(!isset($article))
+              return $this->FailResponse('there is no article to delete');
+
             $path = 'public/Articles';
             foreach ($article->images as $image) {
                 $this->DeleteImage($path, $image);

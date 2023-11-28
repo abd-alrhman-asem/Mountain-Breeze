@@ -16,14 +16,14 @@ class ArticleResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'title' => $this->title,
-            'summary'=> $this->summary,
+            'title'      => $this->title,
+            'summary'    => $this->summary,
             'description'=>$this->description,
-            'language'=> new LanguageResource($this->langauges),
-            'created_at'=>$this->created_at,
-            'images'     => $this->images,
-            'videos'=> $this->videos,
-            'tags'=> TagResource::collection($this->tags),
+            'language'   => $this->langauges->name,
+            'created_at' =>$this->created_at,
+            'images'     => $this->images->pluck('url'),
+            'videos'     => $this->videos->pluck('video'),
+            'tags'       => $this->tags->pluck('name'),
         ];
     }
 }
