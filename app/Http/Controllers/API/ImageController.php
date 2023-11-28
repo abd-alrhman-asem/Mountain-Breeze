@@ -23,6 +23,7 @@ class ImageController extends Controller
             if ($request->has('category_id')) {
                 $images = Image::where('category_id', '=', $request->category_id)->paginate(14);
             }
+
             return ImageResource::collection( $images) ;
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());

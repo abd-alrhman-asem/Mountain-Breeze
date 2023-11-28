@@ -36,7 +36,8 @@ class TagController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(TagResource::collection($tag));
+            $args['data'] = TagResource::collection($tag);
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -76,8 +77,9 @@ class TagController extends Controller
                 'name' => $request->name,
                 'language_id' => $request->language_id,
             ]);
-
-            return $this->successResponse(new TagResource($tag),'store');
+            $args['data'] =  new TagResource($tag);
+            $args['message'] =  'tag stored successfully ';
+            return $this->successResponse($args,200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -97,10 +99,11 @@ class TagController extends Controller
                         $query->where('language_id', '=', $language->id);
                     })->first();
                 } else {
-                    return $this->FailResponse('go out');
+                    return $this->FailResponse('there is no matching lang');
                 }
             }
-            return $this->successResponse(new TagResource($tag));
+            $args['data'] = new TagResource($tag);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -118,7 +121,9 @@ class TagController extends Controller
                 'name' => $request->name ?? $tag->name,
                 'language_id' => $request->language_id ?? $tag->language_id,
             ]);
-            return $this->successResponse(new TagResource($tag));
+            $args['data'] =  new TagResource($tag);
+            $args['message'] =  'tag updated successfully ';
+            return $this->successResponse($args,200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -131,8 +136,9 @@ class TagController extends Controller
     {
         try {
             $tag->delete();
-            return $this->successResponse(new TagResource($tag),$message='deleted done');
-        } catch (\Throwable $th) {
+
+            $args['message'] =  'tag deleted successfully ';
+            return $this->successResponse($args,200);        } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
     }

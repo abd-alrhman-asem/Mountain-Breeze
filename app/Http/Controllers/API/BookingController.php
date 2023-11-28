@@ -32,8 +32,8 @@ class BookingController extends Controller
             if ($request->has('room_type_id')) {
                 $bookings = Booking::where('room_type_id', '=', $request->room_type_id)->get();
             }
-
-            return $this->successResponse(BookingResource::collection($bookings));
+            $args['data'] = BookingResource::collection($bookings);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -56,7 +56,9 @@ class BookingController extends Controller
                 'guest_number' => $request->guest_number,
                 'room_type_id' => $request->room_type_id,
             ]);
-            return $this->successResponse(new BookingResource($booking));
+            $args['message'] = 'booking stored successfully ';
+            $args['data'] = new BookingResource($booking);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -69,7 +71,8 @@ class BookingController extends Controller
     {
         try {
             $booking = Booking::findOrFail($id);
-            return $this->successResponse(new BookingResource($booking));
+            $args['data'] = new BookingResource($booking);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -82,7 +85,8 @@ class BookingController extends Controller
         try {
             $booking = Booking::findOrFail($id);
             $booking->delete();
-            return $this->successResponse();
+            $args['message'] = 'booking deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

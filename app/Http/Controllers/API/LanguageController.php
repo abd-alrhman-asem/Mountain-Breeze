@@ -11,15 +11,19 @@ use App\Traits\APIResponseTrait;
 
 class LanguageController extends Controller
 {
+
+
     use APIResponseTrait;
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+
         try {
             $languages = Language::all();
-            return $this->successResponse(LanguageResource::collection($languages));
+            $args['data'] = LanguageResource::collection($languages);
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -28,14 +32,16 @@ class LanguageController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreLanguageRequest $request)
+    public function store(StoreLanguageRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
             $validate =$request->validated();
             $language = Language::create([
                 'name'=>$request->name,
             ]);
-            return $this->successResponse(new LanguageResource($language));
+            $args['data'] = new LanguageResource($language);
+            $args['message'] = "language created successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -44,11 +50,12 @@ class LanguageController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): \Illuminate\Http\JsonResponse
     {
         try {
             $language = Language::findOrFail($id);
-            return $this->successResponse(new LanguageResource($language));
+            $args['data'] = new LanguageResource($language);
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -57,7 +64,7 @@ class LanguageController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateLanguageRequest $request, string $id)
+    public function update(UpdateLanguageRequest $request, string $id): \Illuminate\Http\JsonResponse
     {
         try {
             $validate =$request->validated();
@@ -65,7 +72,9 @@ class LanguageController extends Controller
             $language->update([
                 'name'=> $request->name ??$language->name,
             ]);
-            return $this->successResponse(new LanguageResource($language));
+            $args['data'] = new LanguageResource($language);
+            $args['message'] = "language updated successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -74,12 +83,13 @@ class LanguageController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): \Illuminate\Http\JsonResponse
     {
         try {
             $language = Language::findOrFail($id);
             $language->delete();
-            return $this->successResponse();
+            $args['message']= "the language deletes successfully";
+            return $this->successResponse( $args ,200) ;
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
