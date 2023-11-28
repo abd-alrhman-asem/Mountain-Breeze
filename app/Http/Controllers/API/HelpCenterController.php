@@ -19,7 +19,8 @@ class HelpCenterController extends Controller
     {
         try {
             $questions = HelpCenter::all();
-            return $this->successResponse(HelpCenterResource::collection($questions));
+            $args['data'] = HelpCenterResource::collection($questions);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -31,7 +32,8 @@ class HelpCenterController extends Controller
     {
         try {
             $questions = HelpCenter::onlyTrashed()->get();
-            return $this->successResponse(HelpCenterResource::collection($questions));
+            $args['data'] = HelpCenterResource::collection($questions);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -53,7 +55,10 @@ class HelpCenterController extends Controller
             $question->message   = $request->message;
 
             $question->save();
-            return $this->successResponse(new HelpCenterResource($question));
+            $args['message'] = ' question stored successfully ';
+            $args['data'] =new HelpCenterResource($question);
+            return $this->successResponse($args , 200 );
+            return $this->successResponse();
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -66,7 +71,8 @@ class HelpCenterController extends Controller
     {
         try {
             $question = HelpCenter::findOrFail($id);
-            return $this->successResponse(new HelpCenterResource($question));
+            $args['data'] = new HelpCenterResource($question);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -80,7 +86,8 @@ class HelpCenterController extends Controller
         try {
             $ids = explode(",", $request->deleted_ids);
             HelpCenter::destroy($ids);
-            return $this->successResponse();
+            $args['message'] = 'question deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

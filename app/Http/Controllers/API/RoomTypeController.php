@@ -29,7 +29,8 @@ class RoomTypeController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(RoomTypeResource::collection($type));
+            $args['data'] = RoomTypeResource::collection($type);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -46,7 +47,9 @@ class RoomTypeController extends Controller
                 'name' => $request->name,
                 'language_id' => $request->language_id,
             ]);
-            return $this->successResponse(new RoomTypeResource($roomType));
+            $args['message'] = 'Room Type stored successfully ';
+            $args['data'] = new RoomTypeResource($roomType);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -70,7 +73,8 @@ class RoomTypeController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new RoomTypeResource($type));
+            $args['data'] = new RoomTypeResource($type);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -88,7 +92,9 @@ class RoomTypeController extends Controller
                 'name' => $request->name ?? $roomType->name,
                 'language_id' => $request->language_id ?? $roomType->language_id,
             ]);
-            return $this->successResponse(new RoomTypeResource($roomType));
+            $args['message'] = 'Room Type updated successfully ';
+            $args['data'] = new RoomTypeResource($roomType);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -102,7 +108,8 @@ class RoomTypeController extends Controller
         try {
             $type = RoomType::findOrFail($id);
             $type->delete();
-            return $this->successResponse();
+            $args['message'] = 'room type  deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

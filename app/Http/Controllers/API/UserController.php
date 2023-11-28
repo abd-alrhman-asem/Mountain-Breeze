@@ -19,7 +19,8 @@ class UserController extends Controller
     {
         try {
             $users = User::all();
-            return $this->successResponse(UserResource::collection($users));
+            $args['data'] = UserResource::collection($users);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -38,7 +39,9 @@ class UserController extends Controller
                 'password'=>$request->password,
                 'type'    =>$request->type,
             ]);
-            return $this->successResponse(new UserResource($user));
+            $args['message'] = 'user stored successfully ';
+            $args['data'] = new UserResource($user);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -51,7 +54,8 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
-            return $this->successResponse(new UserResource($user));
+            $args['data'] = new UserResource($user);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -71,7 +75,9 @@ class UserController extends Controller
                 'password'=>$request->password??$user->password,
                 'type'    =>$request->type    ??$user->type,
             ]);
-            return $this->successResponse(new UserResource($user));
+            $args['message'] = 'user updated successfully ';
+            $args['data'] = new UserResource($user);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -85,7 +91,8 @@ class UserController extends Controller
         try {
             $user = User::findOrFail($id);
             $user->delete();
-            return $this->successResponse();
+            $args['message'] = 'user  deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

@@ -45,8 +45,8 @@ class FoodController extends Controller
             if ($request->has('lang')) {
                 $food = Food::where('lang', '=', $request->lang)->get();
             }
-
-            return $this->successResponse(FoodResource::collection($food));
+            $args['data'] = FoodResource::collection($food);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -70,7 +70,9 @@ class FoodController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Foods');
                 $food->images()->create(['url' => $file_name]);
             }
-            return $this->successResponse(new FoodResource($food));
+            $args['message'] = 'food stored successfully ';
+            $args['data'] =new FoodResource($food);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -94,7 +96,8 @@ class FoodController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new FoodResource($food));
+            $args['data'] = new FoodResource($food);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -123,7 +126,9 @@ class FoodController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Foods');
                 $food->images()->create(['url' => $file_name]);
             }
-            return $this->successResponse(new FoodResource($food));
+            $args['message'] = 'food updated successfully ';
+            $args['data'] =new FoodResource($food);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -141,7 +146,8 @@ class FoodController extends Controller
                 $this->DeleteImage($path, $image);
             }
             $food->delete();
-            return $this->successResponse();
+            $args['message'] = 'food deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

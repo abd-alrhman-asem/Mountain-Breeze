@@ -31,8 +31,8 @@ class CategoryController extends Controller
                         ->whereNull('category_id')
                         ->with('subCategories');
                 })->get();
-            }
-            return $this->successResponse(CategoryResource::collection($categories));
+            } $args['data'] = CategoryResource::collection($categories);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -55,7 +55,9 @@ class CategoryController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Category');
                 $category->images()->create(['url' => $file_name]);
             }
-            return $this->successResponse(new CategoryResource($category));
+            $args['message'] = 'category stored successfully ';
+            $args['data'] = new CategoryResource($category);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -81,7 +83,8 @@ class CategoryController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new CategoryResource($category));
+            $args['data'] = new CategoryResource($category);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -108,8 +111,9 @@ class CategoryController extends Controller
             foreach ($get_images as $image) {
                 $file_name  = $this->StoreImage($image, 'public/Category');
                 $category->images()->create(['url' => $file_name]);
-            }
-            return $this->successResponse(new CategoryResource($category));
+            } $args['message'] = 'category updated successfully ';
+            $args['data'] = new CategoryResource($category);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -127,7 +131,8 @@ class CategoryController extends Controller
                 $this->DeleteImage($path, $image);
             }
             $category->delete();
-            return $this->successResponse();
+            $args['message'] = 'category deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
