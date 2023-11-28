@@ -15,6 +15,10 @@ use App\Http\Requests\UpdateGeneralRequest;
 class GeneralController extends Controller
 {
     use APIResponseTrait;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index','show']]);
+    }
     /**
      * Display a listing of the resource.
      */

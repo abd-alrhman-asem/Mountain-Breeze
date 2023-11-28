@@ -23,6 +23,10 @@ class ArticleController extends Controller
 //    }
 
     use APIResponseTrait, UploadImage, UploadVideo;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index','show','deleted_articles','related_articles']]);
+    }
     /**
      * Display a listing of the resource.
      */

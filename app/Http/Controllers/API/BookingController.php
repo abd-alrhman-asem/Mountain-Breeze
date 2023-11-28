@@ -12,6 +12,10 @@ use Illuminate\Http\Request;
 class BookingController extends Controller
 {
     use APIResponseTrait;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['store','show']]);
+    }
     /**
      * Display a listing of the resource.
      */

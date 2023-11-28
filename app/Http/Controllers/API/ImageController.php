@@ -13,6 +13,10 @@ use App\Traits\UploadImage;
 class ImageController extends Controller
 {
     use APIResponseTrait,UploadImage;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index']]);
+    }
     /**
      * Display a listing of the resource.
      */
@@ -46,29 +50,5 @@ class ImageController extends Controller
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Image $image)
-    {
-
     }
 }
