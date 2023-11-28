@@ -17,6 +17,10 @@ use App\Http\Requests\UpdatePostRequest;
 class PostController extends Controller
 {
     use APIResponseTrait, UploadImage, UploadVideo;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index','show']]);
+    }
     /**
      * Display a listing of the resource.
      */

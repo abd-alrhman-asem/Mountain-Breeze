@@ -13,6 +13,10 @@ use App\Traits\UploadImage;
 class SocialController extends Controller
 {
     use APIResponseTrait,UploadImage;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index','show']]);
+    }
     /**
      * Display a listing of the resource.
      */

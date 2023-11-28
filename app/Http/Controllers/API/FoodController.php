@@ -15,6 +15,10 @@ use App\Http\Requests\UpdateFoodRequest;
 class FoodController extends Controller
 {
     use APIResponseTrait, UploadImage;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['index','show']]);
+    }
     /**
      * Display a listing of the resource.
      */

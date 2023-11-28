@@ -12,6 +12,10 @@ use App\Traits\APIResponseTrait;
 class HelpCenterController extends Controller
 {
     use APIResponseTrait;
+    public function __construct()
+    {
+        $this->middleware('auth:api',['except' => ['show','store']]);
+    }
     /**
      * Display a listing of the resource.
      */
