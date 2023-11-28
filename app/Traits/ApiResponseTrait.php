@@ -6,16 +6,15 @@ use Illuminate\Http\Response;
 
 trait APIResponseTrait
 {
-    public function SuccessResponse($resource = null)
+    public function SuccessResponse($data = [], String $message = null, $status = 200)
     {
-        if ($resource) {
-            return response()->json(['data' => $resource], Response::HTTP_OK);
-        }
-
-        return response()->json(['data' => [
-            'success' => true
-        ]], Response::HTTP_OK);
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'message' => $message,
+        ], $status);
     }
+
 
     public function FailResponse(String $message)
     {

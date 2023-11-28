@@ -60,7 +60,7 @@ Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->n
 
 Route::delete('/forceDestroy/{id}',[ArticleController::class,'forceDestroy'])->name('forceDestroy');
 
-Route::get('/related_articles/{id}',[ArticleController::class,'related_articles'])->name('related_articles');
+Route::get('/related_articles/{article}',[ArticleController::class,'related_articles'])->name('related_articles');
 
 Route::apiResource('tags',TagController::class);
 

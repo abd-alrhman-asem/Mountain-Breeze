@@ -34,7 +34,7 @@ class TagController extends Controller
 
                 $tag = Tag::whereHas('langauges', function ($query) use ($language) {
                     $query->where('language_id', '=', $language->id);
-                })->paginate(9);
+                })->get();
             }
             return $this->successResponse(TagResource::collection($tag));
         } catch (\Throwable $th) {
@@ -77,7 +77,7 @@ class TagController extends Controller
                 'language_id' => $request->language_id,
             ]);
 
-            return $this->successResponse(new TagResource($tag));
+            return $this->successResponse(new TagResource($tag),'store');
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -86,10 +86,9 @@ class TagController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id, Request $request)
+    public function show(Tag $tag, Request $request)
     {
         try {
-            $tag = Tag::findOrFail($id);
             if ($request->header('language')) {
                 $language_header = $request->header('language');
                 $language = Language::where('name', '=', $language_header)->first();
@@ -110,11 +109,10 @@ class TagController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTagRequest $request, string $id)
+    public function update(UpdateTagRequest $request, Tag $tag)
     {
         try {
             $validated = $request->validated();
-            $tag = Tag::findOrFail($id);
 
             $tag->update([
                 'name' => $request->name ?? $tag->name,
@@ -129,12 +127,11 @@ class TagController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Tag $tag)
     {
         try {
-            $tag = Tag::findOrFail($id);
             $tag->delete();
-            return $this->successResponse(new TagResource($tag));
+            return $this->successResponse(new TagResource($tag),$message='deleted done');
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
