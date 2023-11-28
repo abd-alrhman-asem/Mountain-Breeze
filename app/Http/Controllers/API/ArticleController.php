@@ -16,6 +16,12 @@ use App\Traits\UploadVideo;
 
 class ArticleController extends Controller
 {
+
+//    public function __construct()
+//    {
+//        $this->middleware('auth:api', ['except' => ['index', 'show', 'related_articles']]);
+//    }
+
     use APIResponseTrait, UploadImage, UploadVideo;
     public function __construct()
     {
@@ -55,7 +61,8 @@ class ArticleController extends Controller
                     $query->whereName($tagName->name);
                 })->paginate(9);
             }
-            return $this->successResponse(ArticleResource::collection($articles));
+            $args['data'] = ArticleResource::collection($articles);
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -75,7 +82,12 @@ class ArticleController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->onlyTrashed()->get();
             }
-            return $this->successResponse(ArticleResource::collection($articles));
+            if (empty($articles)) {
+                    return $this->FailResponse('there is no deleted articles');
+            }
+              $args['data'] = ArticleResource::collection($articles);
+            return $this->successResponse( $args ,200 );
+//            return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -104,7 +116,8 @@ class ArticleController extends Controller
             if ($articles->isEmpty()) {
                 return $this->FailResponse("there is no article related ");
             }
-            return $this->successResponse(ArticleResource::collection($articles));
+            $args['data'] = ArticleResource::collection($articles);
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -166,19 +179,9 @@ class ArticleController extends Controller
 
             $article->tags()->attach($request->tags);
 
-            $get_images = $request->file('images');
-            foreach ($get_images as $image) {
-                $file_name  = $this->StoreImage($image, 'public/Articles');
-                $article->images()->create(['url' => $file_name]);
-            }
-
-            $get_videos = $request->file('videos');
-            foreach ($get_videos as $video) {
-                $file_name  = $this->StoreVideo($video, 'public/Videos/Articles');
-                $article->videos()->create(['video' => $file_name]);
-            }
-            //return $article;
-           return $this->successResponse(new ArticleResource($article));
+//            $args = $this->getArgs($request, $article);
+            $args['message'] = "article created successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -190,19 +193,20 @@ class ArticleController extends Controller
     public function show(Article $article, Request $request)
     {
         try {
-
             if ($request->header('language')) {
                 $language_header = $request->header('language');
                 $language = Language::where('name', '=', $language_header)->first();
-                if ($language->id == $article->language_id) {
+                if ($language->id == $article->language_id)
+                {
                     $article = Article::whereHas('langauges', function ($query) use ($language) {
                         $query->where('language_id', '=', $language->id);
                     })->where('id', '=', $article->id)->first();
                 } else {
-                    return $this->FailResponse('go out');
+                    return $this->FailResponse('lang docent match ');
                 }
             }
-            return $this->successResponse(new ArticleResource($article));
+            $args['data'] = new ArticleResource($article);
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -233,17 +237,9 @@ class ArticleController extends Controller
 
             $article->tags()->sync($request->tags);
 
-            $get_images = $request->file('images');
-            foreach ($get_images as $image) {
-                $file_name  = $this->StoreImage($image, 'public/Articles');
-                $article->images()->create(['url' => $file_name]);
-            }
-            $get_videos = $request->file('videos');
-            foreach ($get_videos as $video) {
-                $file_name  = $this->StoreVideo($video, 'public/Videos/Articles');
-                $article->videos()->create(['video' => $file_name]);
-            }
-            return $this->successResponse(new ArticleResource($article));
+//            $args = $this->getArgs($request, $article);
+            $args['message'] = "article updated successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -252,16 +248,17 @@ class ArticleController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Article $article)
+    public function destroy(Article $article): \Illuminate\Http\JsonResponse
     {
         try {
             $article->delete();
-            return $this->successResponse();
+            $args['message'] = "article deleted successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
     }
-    public function forceDestroy(string $id)
+    public function forceDestroy(string $id): \Illuminate\Http\JsonResponse
     {
         try {
             $article = Article::onlyTrashed()->find($id);
@@ -279,7 +276,8 @@ class ArticleController extends Controller
             }
             $article->tags()->detach();
             Article::where('id', '=', $id)->forceDelete();
-            return $this->successResponse();
+            $args['message'] = "article deleted forever successfully ";
+            return $this->successResponse( $args ,200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

@@ -39,7 +39,8 @@ class PostController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(PostResource::collection($posts));
+            $args['data'] =PostResource::collection($posts);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -71,7 +72,9 @@ class PostController extends Controller
                 $file_name  = $this->StoreVideo($video, 'public/Videos/Posts');
                 $post->videos()->create(['video' => $file_name, 'category_id' => $request->category_id]);
             }
-            return $this->successResponse(new PostResource($post));
+            $args['message'] = 'post stored successfully ';
+            $args['data'] =new PostResource($post);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -95,7 +98,8 @@ class PostController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new PostResource($post));
+            $args['data'] = new PostResource($post);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -134,7 +138,9 @@ class PostController extends Controller
                 $file_name  = $this->StoreVideo($video, 'public/Videos/Posts');
                 $post->videos()->create(['video' => $file_name]);
             }
-            return $this->successResponse(new PostResource($post));
+            $args['message'] = 'post updated successfully ';
+            $args['data'] =new PostResource($post);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -156,7 +162,8 @@ class PostController extends Controller
                 $this->DeleteVideo($path, $video);
             }
             $post->delete();
-            return $this->successResponse();
+            $args['message'] = 'post deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

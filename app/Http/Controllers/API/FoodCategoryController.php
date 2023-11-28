@@ -33,7 +33,8 @@ class FoodCategoryController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(FoodCategoryResource::collection($food_cat));
+            $args['data']= FoodCategoryResource::collection($food_cat);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -51,7 +52,9 @@ class FoodCategoryController extends Controller
                 'summary' => $request->summary,
                 'language_id' => $request->language_id,
             ]);
-            return $this->successResponse(new FoodCategoryResource($food_cat));
+            $args['data']= new FoodCategoryResource($food_cat);
+            $args['message']= 'food category stored successfully ';
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -75,7 +78,8 @@ class FoodCategoryController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new FoodCategoryResource($food_cat));
+            $args['data']= new FoodCategoryResource($food_cat);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -94,8 +98,9 @@ class FoodCategoryController extends Controller
                 'summary' => $request->summary ?? $food_cat->summary,
                 'language_id' => $request->language_id ?? $food_cat->language_id,
             ]);
-
-            return $this->successResponse(new FoodCategoryResource($food_cat));
+            $args['data']= new FoodCategoryResource($food_cat);
+            $args['message']= 'food category updated successfully ';
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -109,8 +114,8 @@ class FoodCategoryController extends Controller
         try {
             $food_cat = FoodCategory::findOrFail($id);
             $food_cat->delete();
-            return $this->successResponse();
-        } catch (\Throwable $th) {
+            $args['message']= 'food category deleted successfully ';
+            return $this->successResponse($args , 200 );        } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
     }

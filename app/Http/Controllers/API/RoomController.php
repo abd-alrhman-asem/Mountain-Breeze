@@ -49,8 +49,8 @@ class RoomController extends Controller
             if ($request->has('room_type_id')) {
                 $rooms = Room::where('room_type_id', '=', $request->room_type_id)->get();
             }
-
-            return $this->successResponse(RoomResource::collection($rooms));
+            $args['data'] = RoomResource::collection($rooms);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -70,7 +70,8 @@ class RoomController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(RoomResource::collection($rooms));
+            $args['data'] = RoomResource::collection($rooms);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -101,8 +102,9 @@ class RoomController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Rooms');
                 $room->images()->create(['url' => $file_name]);
             }
-
-            return $this->successResponse(new RoomResource($room));
+            $args['message'] = 'room stored successfully ';
+            $args['data'] = new RoomResource($room);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -126,7 +128,8 @@ class RoomController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new RoomResource($room));
+            $args['data'] = new RoomResource($room);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -160,7 +163,9 @@ class RoomController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Rooms');
                 $room->images()->create(['url' => $file_name]);
             }
-            return $this->successResponse(new RoomResource($room));
+            $args['message'] = 'room updated successfully ';
+            $args['data'] = new RoomResource($room);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -179,8 +184,8 @@ class RoomController extends Controller
             }
             $room->services()->detach();
             $room->delete();
-            return $this->successResponse();
-        } catch (\Throwable $th) {
+            $args['message'] = 'Room deleted successfully ';
+            return $this->successResponse($args , 200);        } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
     }

@@ -34,7 +34,8 @@ class ServiceController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(ServiceResource::collection($service));
+            $args['data'] = ServiceResource::collection($service);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -58,8 +59,9 @@ class ServiceController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Services');
                 $service->images()->create(['url' => $file_name]);
             }
-
-            return $this->successResponse(new ServiceResource($service));
+            $args['message'] = 'service stored successfully ';
+            $args['data'] = new ServiceResource($service);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -82,8 +84,8 @@ class ServiceController extends Controller
                 } else {
                     return $this->FailResponse('go out');
                 }
-            }
-            return $this->successResponse(new ServiceResource($service));
+            }  $args['data'] = new ServiceResource($service);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -112,8 +114,9 @@ class ServiceController extends Controller
                 $file_name  = $this->StoreImage($image, 'public/Services');
                 $service->images()->create(['url' => $file_name]);
             }
-
-            return $this->successResponse(new ServiceResource($service));
+            $args['message'] = 'service upload successfully ';
+            $args['data'] = new ServiceResource($service);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -131,7 +134,8 @@ class ServiceController extends Controller
                 $this->DeleteImage($path, $image);
             }
             $service->delete();
-            return $this->successResponse();
+            $args['message'] = 'service deleted successfully ';
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

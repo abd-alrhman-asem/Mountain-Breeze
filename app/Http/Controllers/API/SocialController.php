@@ -24,7 +24,8 @@ class SocialController extends Controller
     {
         try {
             $link = SocialMedia::all();
-            return $this->successResponse(SocialResource::collection($link));
+            $args['data'] = SocialResource::collection($link);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -47,7 +48,9 @@ class SocialController extends Controller
                 $file_name  = $this->StoreImage($image,'public/SocialMedia');
                 $link->images()->create(['url'=>$file_name]);
             }
-            return $this->successResponse(new SocialResource($link));
+            $args['message'] = 'social media account  stored successfully ';
+            $args['data'] = new SocialResource($link);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -60,7 +63,8 @@ class SocialController extends Controller
     {
         try {
             $link = SocialMedia::findOrFail($id);
-            return $this->successResponse(new SocialResource($link));
+            $args['data'] = new SocialResource($link);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -89,7 +93,9 @@ class SocialController extends Controller
                 $file_name  = $this->StoreImage($image,'public/SocialMedia');
                 $link->images()->create(['url'=>$file_name]);
             }
-            return $this->successResponse(new SocialResource($link));
+            $args['message'] = 'social media account  updated successfully ';
+            $args['data'] = new SocialResource($link) ;
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -107,7 +113,8 @@ class SocialController extends Controller
                 $this->DeleteImage($path,$image);
                }
             $link->delete();
-            return $this->successResponse();
+            $args['message'] = 'social media account deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }

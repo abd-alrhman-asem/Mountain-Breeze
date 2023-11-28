@@ -34,7 +34,8 @@ class GeneralController extends Controller
                     $query->where('language_id', '=', $language->id);
                 })->get();
             }
-            return $this->successResponse(GeneralResource::collection($information));
+            $args['data'] = GeneralResource::collection($information);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -60,8 +61,9 @@ class GeneralController extends Controller
                 $information->icon = $filename;
                 $information->save();
             }
-
-            return $this->successResponse(new GeneralResource($information));
+            $args['message'] = 'general details  stored successfully ';
+            $args['data'] =new GeneralResource($information);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -85,7 +87,8 @@ class GeneralController extends Controller
                     return $this->FailResponse('go out');
                 }
             }
-            return $this->successResponse(new GeneralResource($information));
+            $args['data'] =new GeneralResource($information);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -112,7 +115,9 @@ class GeneralController extends Controller
                 'language_id' => $request->language_id,
                 'icon' => $filename,
             ]);
-            return $this->successResponse(new GeneralResource($general));
+            $args['message'] = 'general details  updated successfully ';
+            $args['data'] =new GeneralResource($general);
+            return $this->successResponse($args , 200 );
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
@@ -125,7 +130,9 @@ class GeneralController extends Controller
         try {
             Storage::delete('public/images/' . $general->icon);
             $general->delete();
-            return $this->successResponse();
+
+            $args['message'] = 'general details  deleted successfully ';
+            return $this->successResponse($args , 200);
         } catch (\Throwable $th) {
             return $this->FailResponse($th->getMessage());
         }
