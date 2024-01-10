@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\JsonResponse as JsonResponseAlias;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -43,23 +44,22 @@ trait APIResponseTrait
             ,$statusCode);
     }
 
-    // ... (Other methods remain the same, adjust as needed)
-
     /**
-     * Response with status code 200.
+     * Get the token array structure.
+     *
+     * @param string $token
      *
      * @return JsonResponseAlias
      */
-    public function loggedInSuccessfully(): JsonResponseAlias
-    {
-        $data = [
-            'access_token' => 'example_access_token', // Replace with the actual access token or remove if not needed.
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-        ];
 
-        // Use the successResponse method for consistency.
-        return $this->successResponse($data, 'user logged in successfully');
+    public function loggedInSuccessfully(string $token ): JsonResponseAlias
+    {
+        return response()->json([
+            'success'       => 'true' ,
+            'access_token'  =>  $token ,
+            'token_type'    => 'bearer',
+            'expires_in'    => auth()->factory()->getTTL() * 604800
+        ]);
     }
 
     /**
@@ -127,7 +127,7 @@ trait APIResponseTrait
      * @param string $message
      * @return JsonResponseAlias
      */
-    public function unauthorizedResponse(mixed $data, string $message = ''): JsonResponseAlias
+    public function unauthorizedResponse(string $message = ''): JsonResponseAlias
     {
         return $this->errorResponse( $message, Response::HTTP_UNAUTHORIZED);
     }

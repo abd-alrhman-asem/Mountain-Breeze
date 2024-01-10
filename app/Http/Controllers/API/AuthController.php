@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Traits\APIResponseTrait;
+use Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
+    use APIResponseTrait;
+
     public function __construct()
     {
         $this->middleware('auth:api', ['except' => ['login']]);
@@ -14,52 +18,48 @@ class AuthController extends Controller
     /**
      * Get a JWT via given credentials.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function login()
+    public function login(): JsonResponse
     {
-        $credentials = request(['email', 'password']);
-
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        try {
+            $credentials = request(['email', 'password']);
+            if (!$token = auth()->attempt($credentials))
+                return $this->unauthorizedResponse('Unauthorized');
+            return $this->loggedInSuccessfully($token);
+        } catch (\Throwable $th) {
+            return $this->generalFailureResponse($th->getMessage());
         }
-
-        return $this->respondWithToken($token);
     }
+
     /**
      * Get the authenticated User.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function me()
+    public function me(): JsonResponse
     {
-        return response()->json(auth()->user());
+        try {
+            return $this->successResponse(auth()->user());
+        } catch (\Throwable $th) {
+            return $this->generalFailureResponse($th->getMessage());
+        }
+
     }
 
     /**
      * Log the user out (Invalidate the token).
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
-        auth()->logout();
+        try {
+            auth()->logout();
+            return $this->successOperationResponse('Successfully logged out');
+        } catch (\Throwable $th) {
+            return $this->generalFailureResponse($th->getMessage());
+        }
+    }
 
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-    /**
-     * Get the token array structure.
-     *
-     * @param  string $token
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-        ]);
-    }
 }
