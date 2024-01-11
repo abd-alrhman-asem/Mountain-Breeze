@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Booking;
+use App\Models\RoomType;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -22,6 +24,10 @@ class DatabaseSeeder extends Seeder
             RoomTypeSeeder::class,
             GeneralSeeder::class,
             SocialSeeder::class
+
         ]);
+        Booking::factory(10)->create();
+        RoomType::factory(5)->create();
+
     }
 }

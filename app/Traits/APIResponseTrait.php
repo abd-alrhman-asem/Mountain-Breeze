@@ -71,13 +71,15 @@ trait APIResponseTrait
     public function generalFailureResponse(mixed $errorMessage): JsonResponseAlias
     {
         // Use the errorResponse method for consistency.
-        return $this->errorResponse($errorMessage);
+        return $this->errorResponse("general error : " . $errorMessage);
+        // this for in production statue
+        //return $this->errorResponse("general error please try again" );
     }
 
     /**
      * Response with status code 200.
      *
-     * @param string $statue
+     * @param string $statueMessage
      * @param int $statusCode
      * @return JsonResponseAlias
      */
@@ -100,30 +102,10 @@ trait APIResponseTrait
     {
      return $this->successOperationResponse($modelName.' created successfully', Response::HTTP_CREATED);
     }
-    /**
-     * Response with status code 204.
-     *
-     */
-    public function noContentResponse(): JsonResponseAlias
-    {
-        return $this->errorResponse();
-    }
-    /**
-     * Response with status code 400.
-     *
-     * @param mixed $data
-     * @param string $message
-     * @return JsonResponseAlias
-     */
-    public function badRequestResponse(mixed $data, string $message = ''): JsonResponseAlias
-    {
-        return $this->errorResponse( $message, Response::HTTP_BAD_REQUEST);
-    }
 
     /**
      * Response with status code 401.
      *
-     * @param mixed $data
      * @param string $message
      * @return JsonResponseAlias
      */
@@ -131,27 +113,36 @@ trait APIResponseTrait
     {
         return $this->errorResponse( $message, Response::HTTP_UNAUTHORIZED);
     }
-    /**
-     * Response with status code 403.
-     *
-     * @param mixed $data
-     * @param string $message
-     * @return JsonResponseAlias
-     */
-    public function forbiddenResponse(mixed $data, string $message = ''): JsonResponseAlias
-    {
-        return $this->errorResponse( $message, Response::HTTP_FORBIDDEN);
-    }
+
     /**
      * Response with status code 404.
      *
-     * @param mixed $data
      * @param string $message
      * @return JsonResponseAlias
      */
     public function notFoundResponse( string $message = ''): JsonResponseAlias
     {
         return $this->errorResponse( $message, Response::HTTP_NOT_FOUND);
+    }
+    //___________________________________________________________________________________________________________
+    /**
+     * Response with status code 422.
+     *
+     * @param mixed $data
+     * @param string $message
+     * @return JsonResponseAlias
+     */
+    public function unprocessableResponse(mixed $data, string $message = ''): JsonResponseAlias
+    {
+        return $this->errorResponse( $message, Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+    /**
+     * Response with status code 204.
+     *
+     */
+    public function noContentResponse(): JsonResponseAlias
+    {
+        return $this->errorResponse();
     }
     /**
      * Response with status code 409.
@@ -165,14 +156,25 @@ trait APIResponseTrait
         return $this->errorResponse( $message, Response::HTTP_CONFLICT);
     }
     /**
-     * Response with status code 422.
+     * Response with status code 403.
      *
      * @param mixed $data
      * @param string $message
      * @return JsonResponseAlias
      */
-    public function unprocessableResponse(mixed $data, string $message = ''): JsonResponseAlias
+    public function forbiddenResponse(mixed $data, string $message = ''): JsonResponseAlias
     {
-        return $this->errorResponse( $message, Response::HTTP_UNPROCESSABLE_ENTITY);
+        return $this->errorResponse( $message, Response::HTTP_FORBIDDEN);
+    }
+    /**
+     * Response with status code 400.
+     *
+     * @param mixed $data
+     * @param string $message
+     * @return JsonResponseAlias
+     */
+    public function badRequestResponse(mixed $data, string $message = ''): JsonResponseAlias
+    {
+        return $this->errorResponse( $message, Response::HTTP_BAD_REQUEST);
     }
 }

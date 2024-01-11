@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
@@ -21,7 +22,7 @@ class Booking extends Model
         'created_at',
     ];
 
-    public function type()
+    public function type():BelongsTo
     {
         return $this->belongsTo(RoomType::class,'room_type_id','id');
     }

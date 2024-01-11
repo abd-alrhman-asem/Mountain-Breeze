@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Models\Category;
 use App\Models\Language;
 use App\Traits\UploadImage;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
@@ -15,55 +16,53 @@ use App\Http\Requests\UpdateCategoryRequest;
 class CategoryController extends Controller
 {
     use APIResponseTrait, UploadImage;
+
     public function __construct()
     {
-        $this->middleware('auth:api',['except' => ['index','show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show']]);
     }
+
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
-            //$categories = Category::all();
+            $categories = Category::all();
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
+                $language = Language::where('name', $request->header('language'))->first();
 
-                $categories = Category::whereHas('langauges', function ($query) use ($language) {
-                    $query->where('language_id', '=', $language->id)
-                        ->whereNull('category_id')
-                        ->with('subCategories');
-                })->get();
-            } $args['data'] = CategoryResource::collection($categories);
-            return $this->successResponse($args , 200 );
+                $categories = Category::where('language_id', '=', $language->id)
+                    ->whereNull('category_id')
+                    ->with('subCategories')
+                    ->get();
+            }
+            return $this->successResponse(CategoryResource::collection($categories));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreCategoryRequest $request)
+    public function store(StoreCategoryRequest $request): JsonResponse
     {
         try {
             $category = Category::create([
-                'name'        => $request->name,
-                'summary'     => $request->summary,
+                'name' => $request->name,
+                'summary' => $request->summary,
                 'language_id' => $request->language_id,
                 'category_id' => $request->category_id,
             ]);
             $get_images = $request->file('images');
             foreach ($get_images as $image) {
-                $file_name  = $this->StoreImage($image, 'public/Category');
+                $file_name = $this->StoreImage($image, 'public/Category');
                 $category->images()->create(['url' => $file_name]);
             }
-            $args['message'] = 'category stored successfully ';
-            $args['data'] = new CategoryResource($category);
-            return $this->successResponse($args , 200 );
+            return $this->successOperationResponse('category created successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
@@ -75,70 +74,63 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-                if ($language->id == $category->language_id) {
-                    $category = Category::whereHas('langauges', function ($query) use ($language) {
-                        $query->where('language_id', '=', $language->id)
-                            ->whereNull('category_id')
-                            ->with('subCategories');
-                    })->first();
-                } else {
-                    return $this->FailResponse('go out');
-                }
+                $language = Language::where('name', $request->header('language'))->first();
+                if ( (!$language->id == $category->language_id))
+                    return $this->errorResponse('this category  is in another language');
             }
-            $args['data'] = new CategoryResource($category);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse(new CategoryResource($category));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateCategoryRequest $request, string $id)
+    public function update(UpdateCategoryRequest $request, string $id): JsonResponse
     {
         try {
-            $category = Category::findOrFail($id);
-            $path = 'public/Category';
-            foreach ($category->images as $image) {
-                $this->DeleteImage($path, $image);
+            $category = Category::find($id);
+            if (!$category)
+                return $this->errorResponse('there are no category to update it ');
+
+            if ( $get_images = $request->file('images')) {
+                foreach ($category->images as $image) {
+                    $this->DeleteImage('public/Category', $image);
+                }
+                foreach ($get_images as $image) {
+                    $file_name = $this->StoreImage($image, 'public/Category');
+                    $category->images()->create(['url' => $file_name]);
+                }
             }
             $category->update([
-                'name'       => $request->name       ?? $category->name,
-                'summary'    => $request->summary    ?? $category->summary,
-                'language_id' => $request->language_id      ?? $category->language_id,
-                'category_id' => $request->category_id ?? $category->category_id,
+                'name'          => $request->name           ?? $category->name,
+                'summary'       => $request->summary        ?? $category->summary,
+                'language_id'   => $request->language_id    ?? $category->language_id,
+                'category_id'   => $request->category_id    ?? $category->category_id,
             ]);
-            $get_images = $request->file('images');
-            foreach ($get_images as $image) {
-                $file_name  = $this->StoreImage($image, 'public/Category');
-                $category->images()->create(['url' => $file_name]);
-            } $args['message'] = 'category updated successfully ';
-            $args['data'] = new CategoryResource($category);
-            return $this->successResponse($args , 200 );
+            return $this->successOperationResponse('category updated successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
-            $category = Category::findOrFail($id);
-            $path = 'public/Category';
+            $category = Category::find($id);
+            if (!$category)
+                return $this->errorResponse('there are no category to delete it ');
             foreach ($category->images as $image) {
-                $this->DeleteImage($path, $image);
+                $this->DeleteImage('public/Category', $image);
             }
             $category->delete();
-            $args['message'] = 'category deleted successfully ';
-            return $this->successResponse($args , 200);
+            return $this->successOperationResponse('category deleted successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }

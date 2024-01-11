@@ -22,5 +22,6 @@ class RoomTypeSeeder extends Seeder
             'name'=>'غرفة دوبلكس',
             'language_id'=>1,
         ]);
+        RoomType::factory(5)->create();
     }
 }
