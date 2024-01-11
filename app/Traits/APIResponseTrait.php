@@ -124,18 +124,18 @@ trait APIResponseTrait
     {
         return $this->errorResponse( $message, Response::HTTP_NOT_FOUND);
     }
-    //___________________________________________________________________________________________________________
     /**
      * Response with status code 422.
      *
-     * @param mixed $data
      * @param string $message
      * @return JsonResponseAlias
      */
-    public function unprocessableResponse(mixed $data, string $message = ''): JsonResponseAlias
+    public function unprocessableResponse( string $message = ''): JsonResponseAlias
     {
         return $this->errorResponse( $message, Response::HTTP_UNPROCESSABLE_ENTITY);
     }
+    //___________________________________________________________________________________________________________
+
     /**
      * Response with status code 204.
      *

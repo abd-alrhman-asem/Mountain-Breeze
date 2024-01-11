@@ -30,7 +30,8 @@ class CategoryController extends Controller
         try {
             $categories = Category::all();
             if ($request->header('language')) {
-                $language = Language::where('name', $request->header('language'))->first();
+                if (!$language = Language::where('name', '=', $request->header('language'))->first())
+                    return $this->errorResponse('there are no language for this name');
 
                 $categories = Category::where('language_id', '=', $language->id)
                     ->whereNull('category_id')
@@ -74,7 +75,8 @@ class CategoryController extends Controller
         try {
             $category = Category::findOrFail($id);
             if ($request->header('language')) {
-                $language = Language::where('name', $request->header('language'))->first();
+                if (!$language = Language::where('name', '=', $request->header('language'))->first())
+                    return $this->errorResponse('there are no language for this name');
                 if ( (!$language->id == $category->language_id))
                     return $this->errorResponse('this category  is in another language');
             }

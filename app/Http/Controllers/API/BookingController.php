@@ -31,6 +31,7 @@ class BookingController extends Controller
         try {
 
             $bookings = Booking::all();
+
             if ($request->has('created_at')) {
                 if ($request->created_at) {
                     $date = Carbon::parse($request->created_at);

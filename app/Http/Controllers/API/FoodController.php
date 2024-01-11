@@ -31,8 +31,8 @@ class FoodController extends Controller
         try {
             $food = Food::query();
             if ($request->header('language')) {
-                $language = Language::where('name', '=', $request->header('language'))->first();
-                $food->where('language_id', '=', $language->id);
+                if (!$language = Language::where('name', '=', $request->header('language'))->first())
+                    return $this->errorResponse('there are no language for this name');
             }
 
             if ($request->has('food_category_id')) {

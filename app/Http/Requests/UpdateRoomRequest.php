@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use App\Traits\APIResponseTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
@@ -23,7 +24,7 @@ class UpdateRoomRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -43,9 +44,8 @@ class UpdateRoomRequest extends FormRequest
         $errorMessage = $validator->errors()->all();
         $errorMessage = (string) array_pop($errorMessage);
         throw new HttpResponseException(
-            response: $this->errorResponse(
-                $errorMessage,
-                422
+            response: $this->unprocessableResponse(
+                $errorMessage
             )
         );
     }

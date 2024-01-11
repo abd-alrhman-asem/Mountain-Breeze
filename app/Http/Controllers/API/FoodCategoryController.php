@@ -29,7 +29,8 @@ class FoodCategoryController extends Controller
         try {
             $food_cat = FoodCategory::all();
             if ($request->header('language')) {
-                $language = Language::where('name', '=', $request->header('language'))->first();
+                if (!$language = Language::where('name', '=', $request->header('language'))->first())
+                    return $this->errorResponse('there are no language for this name');
                 $food_cat = FoodCategory::where('language_id', '=', $language->id)->get();
             }
             return $this->successResponse(FoodCategoryResource::collection($food_cat));
@@ -62,12 +63,12 @@ class FoodCategoryController extends Controller
     public function show(string $id, Request $request): JsonResponse
     {
         try {
-
             $food_category = FoodCategory::find($id);
             if (!$food_category)
                 return $this->errorResponse('there are no food category for this id  ');
             if ($request->header('language')) {
-                $language = Language::where('name', '=', $request->header('language'))->first();
+                if (!$language = Language::where('name', '=', $request->header('language'))->first())
+                    return $this->errorResponse('there are no language for this name');
                 if ($language->id != $food_category->language_id) {
                     return $this->errorResponse('this food category is in another language');
                 }
@@ -97,9 +98,9 @@ class FoodCategoryController extends Controller
                 }
             }
             $food_category->update([
-                'name' =>           $request->name ??               $food_cat->name,
-                'summary' =>        $request->summary ??            $food_cat->summary,
-                'language_id' =>    $request->language_id ??        $food_cat->language_id,
+                'name' => $request->name ?? $food_cat->name,
+                'summary' => $request->summary ?? $food_cat->summary,
+                'language_id' => $request->language_id ?? $food_cat->language_id,
             ]);
             return $this->successOperationResponse('food category updated successfully ');
         } catch (\Throwable $th) {

@@ -46,9 +46,8 @@ class StoreFoodCategoryRequest extends FormRequest
         $errorMessage = $validator->errors()->all();
         $errorMessage = (string) array_pop($errorMessage);
         throw new HttpResponseException(
-            response: $this->errorResponse(
-                $errorMessage,
-                422
+            response: $this->unprocessableResponse(
+                $errorMessage
             )
         );
     }

@@ -15,10 +15,11 @@ class GeneralResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id'=>$this->id,
             'name' => $this->name,
             'value'=>$this->value,
             'icon'=>$this->icon,
-            'language'=> new LanguageResource($this->langauges),
+            'language'=> $this->langauges->name,
         ];
     }
 }
