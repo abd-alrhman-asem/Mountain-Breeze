@@ -15,10 +15,12 @@ class FoodResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'title'=>$this->title,
             'description'=>$this->description,
-            'language'=> new LanguageResource($this->langauges),
+            'language'=> $this->langauges->name,
             'images' => $this->images,
+            'food_category' =>  $this->category->name
         ];
     }
 }

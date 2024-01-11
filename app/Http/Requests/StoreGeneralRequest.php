@@ -2,10 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\APIResponseTrait;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreGeneralRequest extends FormRequest
 {
+    use APIResponseTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -22,11 +27,23 @@ class StoreGeneralRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'=>'required|string',
-            'value'=>'required|string',
-            'language_id'=>'required|integer|exists:languages,id',
-            'icon'=>'image'
+            'name' => 'required|string',
+            'value' => 'required|string',
+            'language_id' => 'required|integer|exists:languages,id',
+            'icon' => 'image'
 
         ];
+    }
+
+    protected function failedValidation(Validator $validator): void
+    {
+        $errorMessage = $validator->errors()->all();
+        $errorMessage = (string)array_pop($errorMessage);
+        throw new HttpResponseException(
+            response: $this->errorResponse(
+                $errorMessage,
+                422
+            )
+        );
     }
 }

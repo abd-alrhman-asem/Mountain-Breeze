@@ -2,10 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\APIResponseTrait;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Contracts\Validation\Validator;
+
 
 class UpdatePostRequest extends FormRequest
 {
+    use APIResponseTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -22,11 +28,22 @@ class UpdatePostRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'      =>'required|string',
-            'summary'    =>'required|string',
-            'description'=>'required|string',
-            'language_id'=>'required|integer|exists:languages,id',
-            'category_id'=>'required|integer',
+            'title' => 'required|string',
+            'summary' => 'required|string',
+            'description' => 'required|string',
+            'language_id' => 'required|integer|exists:languages,id',
+            'category_id' => 'required|integer',
         ];
+    }
+    protected function failedValidation(Validator $validator): void
+    {
+        $errorMessage = $validator->errors()->all();
+        $errorMessage = (string) array_pop($errorMessage);
+        throw new HttpResponseException(
+            response: $this->errorResponse(
+                $errorMessage,
+                422
+            )
+        );
     }
 }

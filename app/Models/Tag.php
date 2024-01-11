@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Models\Article;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tag extends Model
 {
@@ -17,14 +19,14 @@ class Tag extends Model
     ];
 
         /**
-     * Get all of the comments for the User
+     * Get all the comments for the User
      *
      */
-    public function articles()
+    public function articles(): BelongsToMany
     {
         return $this->belongsToMany(Article::class);
     }
-    public function langauges()
+    public function langauges(): BelongsTo
     {
         return $this->belongsTo(Language::class,'language_id','id');
     }
