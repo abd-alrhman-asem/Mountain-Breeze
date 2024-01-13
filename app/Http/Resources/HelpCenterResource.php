@@ -15,6 +15,7 @@ class HelpCenterResource extends JsonResource
     public function toArray(Request $request): array
     {
         return[
+            'id'         =>$this->id,
             'full name'  =>$this->full_name,
             'phone'      =>$this->phone,
             'email'      =>$this->email,
