@@ -19,5 +19,6 @@ class LanguageSeeder extends Seeder
         $English= Language::create([
             'name'=>'En',
         ]);
+        Language::factory(10)->create();
     }
 }

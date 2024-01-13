@@ -8,28 +8,34 @@ use App\Http\Requests\UpdateLanguageRequest;
 use App\Http\Resources\LanguageResource;
 use App\Models\Language;
 use App\Traits\APIResponseTrait;
+use Illuminate\Http\JsonResponse;
 
 class LanguageController extends Controller
 {
 
 
     use APIResponseTrait;
+
     public function __construct()
     {
         $this->middleware('auth:api');
     }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
 
         try {
             $languages = Language::all();
-            $args['data'] = LanguageResource::collection($languages);
-            return $this->successResponse( $args ,200 );
+            if (!$languages) {
+                return $this->errorResponse('there are no languages.');
+            }
+
+            return $this->successResponse(LanguageResource::collection($languages));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
@@ -39,63 +45,66 @@ class LanguageController extends Controller
     public function store(StoreLanguageRequest $request): \Illuminate\Http\JsonResponse
     {
         try {
-            $validate =$request->validated();
-            $language = Language::create([
-                'name'=>$request->name,
+            Language::create([
+                'name' => $request->name,
             ]);
-            $args['data'] = new LanguageResource($language);
-            $args['message'] = "language created successfully ";
-            return $this->successResponse( $args ,200 );
+            return $this->successOperationResponse("language created successfully ");
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id): \Illuminate\Http\JsonResponse
+    public function show(string $id): JsonResponse
     {
         try {
-            $language = Language::findOrFail($id);
-            $args['data'] = new LanguageResource($language);
-            return $this->successResponse( $args ,200 );
+            if (!$id)
+                return $this->errorResponse(' please enter the id ');
+            if (!$language = Language::find($id))
+                return $this->errorResponse('there are no language for this id ');
+            return $this->successResponse(new LanguageResource($language));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateLanguageRequest $request, string $id): \Illuminate\Http\JsonResponse
+    public function update(UpdateLanguageRequest $request, string $id): JsonResponse
     {
         try {
-            $validate =$request->validated();
-            $language = Language::findOrFail($id);
+            if (!$id)
+                return $this->errorResponse(' please enter the id ');
+            if (!$language = Language::find($id))
+                return $this->errorResponse('there are no language for this id ');
+
             $language->update([
-                'name'=> $request->name ??$language->name,
+                'name' => $request->name ?? $language->name,
             ]);
-            $args['data'] = new LanguageResource($language);
-            $args['message'] = "language updated successfully ";
-            return $this->successResponse( $args ,200 );
+            return $this->successOperationResponse("language updated successfully ");
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): \Illuminate\Http\JsonResponse
+    public function destroy(string $id): JsonResponse
     {
         try {
-            $language = Language::findOrFail($id);
+            if (!$id)
+                return $this->errorResponse(' please enter the id ');
+            if (!$language = Language::find($id))
+                return $this->errorResponse('there are no language for this id ');
             $language->delete();
-            $args['message']= "the language deletes successfully";
-            return $this->successResponse( $args ,200) ;
+            return $this->successOperationResponse("the language deletes successfully");
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
+
         }
     }
 }
