@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Models\Language;
 use App\Models\RoomType;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
@@ -21,86 +22,74 @@ class RoomTypeController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request):JsonResponse
     {
         try {
             $type = RoomType::all();
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-
-                $type = RoomType::whereHas('langauges', function ($query) use ($language) {
-                    $query->where('language_id', '=', $language->id);
-                })->get();
+                $language = Language::where('name', '=',$request->header('language'))->first();
+                $type = RoomType::where('language_id', '=', $language->id)->get();
             }
-            $args['data'] = RoomTypeResource::collection($type);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse(RoomTypeResource::collection($type) );
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreRoomTypeRequest $request)
+    public function store(StoreRoomTypeRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validated();
-            $roomType = RoomType::create([
+            RoomType::create([
                 'name' => $request->name,
                 'language_id' => $request->language_id,
             ]);
-            $args['message'] = 'Room Type stored successfully ';
-            $args['data'] = new RoomTypeResource($roomType);
-            return $this->successResponse($args , 200 );
+            return $this->successOperationResponse('Room Type stored successfully ' );
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id, Request $request)
+    public function show(string $id, Request $request): JsonResponse
     {
         try {
-            $type = RoomType::findOrFail($id);
+            $roomType = RoomType::find($id);
+            if (!$roomType)
+                return $this->errorResponse('there are no roomType for this id ');
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-                if ($language->id == $type->language_id) {
-                    $type = RoomType::whereHas('langauges', function ($query) use ($language) {
-                        $query->where('language_id', '=', $language->id);
-                    })->first();
-                } else {
-                    return $this->FailResponse('go out');
+                $language = Language::where('name', '=', $request->header('language'))->first();
+
+                if ($language->id != $roomType->language_id) {
+                    return $this->errorResponse('this RoomType is for another language ');
                 }
             }
-            $args['data'] = new RoomTypeResource($type);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse(new RoomTypeResource($roomType) );
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRoomTypeRequest $request, string $id)
+    public function update(UpdateRoomTypeRequest $request, string $id): JsonResponse
     {
         try {
-            $validated = $request->validated();
-            $roomType = RoomType::findOrFail($id);
+            $roomType = RoomType::find($id);
+            if (!$roomType)
+                return $this->errorResponse('there are no roomType for this id ');
             $roomType->update([
                 'name' => $request->name ?? $roomType->name,
                 'language_id' => $request->language_id ?? $roomType->language_id,
             ]);
-            $args['message'] = 'Room Type updated successfully ';
-            $args['data'] = new RoomTypeResource($roomType);
-            return $this->successResponse($args , 200 );
+            return $this->successOperationResponse('Room Type updated successfully ' );
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
@@ -110,12 +99,13 @@ class RoomTypeController extends Controller
     public function destroy(string $id)
     {
         try {
-            $type = RoomType::findOrFail($id);
-            $type->delete();
-            $args['message'] = 'room type  deleted successfully ';
-            return $this->successResponse($args , 200);
+            $roomType = RoomType::find($id);
+            if (!$roomType)
+                return $this->errorResponse('there are no roomType for this id ');
+            $roomType->delete();
+            return $this->successOperationResponse('room type  deleted successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }
