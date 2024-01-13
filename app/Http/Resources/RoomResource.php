@@ -15,16 +15,17 @@ class RoomResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'name'           =>$this->name,
-            'description'    =>$this->description,
-            'summary'        =>$this->summary,
-            'price_per_night'=>$this->price_per_night,
-            'guest_number'   =>$this->guest_number,
-            'location'       =>$this->location,
-            'language'=> new LanguageResource($this->langauges),
-            'room_type_id'   => new RoomTypeResource($this->types),
-            'services'       => ServiceResource::collection($this->services),
-            'images'     => $this->images,
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'summary' => $this->summary,
+            'price_per_night' => $this->price_per_night,
+            'guest_number' => $this->guest_number,
+            'location' => $this->location,
+            'language' => $this->langauges->name,
+            'room_type_id' => $this->types->name,
+            'services' => $this->services->pluck('name'),
+            'images' => $this->images->pluck('url'),
         ];
     }
 }
