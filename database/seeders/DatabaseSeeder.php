@@ -23,11 +23,12 @@ class DatabaseSeeder extends Seeder
             TagsSeeder::class,
             RoomTypeSeeder::class,
             GeneralSeeder::class,
-            SocialSeeder::class
+            SocialSeeder::class,
+            PostSeeder::class,
+            bookingSeeder::class,
+            FoodSeeder::class,
+            HelpCenterSeeder::class,
 
         ]);
-        Booking::factory(10)->create();
-        RoomType::factory(5)->create();
-
     }
 }
