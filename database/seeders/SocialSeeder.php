@@ -17,5 +17,7 @@ class SocialSeeder extends Seeder
             'name'=>'mountain_email',
             'link'=>'mountainBrezze@gmail.com'
         ]);
+        SocialMedia::factory(10)->create();
+
     }
 }
