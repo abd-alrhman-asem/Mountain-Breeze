@@ -46,6 +46,6 @@ class ServicesSeeder extends Seeder
             'name'=>'تلفاز',
             'language_id'=>1,
         ]);
-
+        Service::factory(10)->create();
     }
 }
