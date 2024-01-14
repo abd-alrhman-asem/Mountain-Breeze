@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\StoreVideoRequest;
 use App\Models\Video;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\VideoResource;
@@ -20,16 +21,16 @@ class VideoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try{
             $videos = Video::paginate(7);
             if ($request->has('category_id')) {
                 $videos = Video::where('category_id', '=', $request->category_id)->paginate(7);
             }
-            return VideoResource::collection($videos) ;
+            return $this->successResponse( VideoResource::collection($videos)) ;
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
 
     }
@@ -45,10 +46,10 @@ class VideoController extends Controller
                 'video'      =>$file_name,
                 'category_id'=>$request->category_id,
             ]);
-            return new VideoResource($video);
+            return  $this->successOperationResponse('video stored successfully ');
 
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }
