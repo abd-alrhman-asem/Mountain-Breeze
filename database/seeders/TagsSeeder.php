@@ -38,5 +38,6 @@ class TagsSeeder extends Seeder
             'name'=>'#سياحة',
             'language_id'=>1,
         ]);
+        Tag::factory(10)->create();
     }
 }
