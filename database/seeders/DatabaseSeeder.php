@@ -15,20 +15,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
-            LanguageSeeder::class,
+            bookingSeeder::class,
             CategorySeeder::class,
             FoodCategorySeeder::class,
-            ServicesSeeder::class,
-            TagsSeeder::class,
-            RoomTypeSeeder::class,
-            GeneralSeeder::class,
-            SocialSeeder::class,
-            PostSeeder::class,
-            bookingSeeder::class,
             FoodSeeder::class,
+            GeneralSeeder::class,
             HelpCenterSeeder::class,
-
+            LanguageSeeder::class,
+            PostSeeder::class,
+            RoomSeeder::class,
+            RoomTypeSeeder::class,
+            ServicesSeeder::class,
+            SocialSeeder::class,
+            TagsSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }
