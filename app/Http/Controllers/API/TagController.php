@@ -9,141 +9,94 @@ use App\Http\Resources\TagResource;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class TagController extends Controller
 {
     use APIResponseTrait;
+
     public function __construct()
     {
-        $this->middleware('auth:api',['except' => ['index','show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show']]);
     }
-    /**
-     * Display a listing of the resource.
-     */
-    /**
-     * @OA\Get(
-     *     path="/api/tags",
-     *     summary="Get tags details",
-     *     @OA\Response(response="200", description="Success"),
-     * )
-     */
-    public function index(Request $request)
+
+    public function index(Request $request): JsonResponse
     {
         try {
-            $tag = Tag::all();
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-
-                $tag = Tag::whereHas('langauges', function ($query) use ($language) {
-                    $query->where('language_id', '=', $language->id);
-                })->get();
+                $language = Language::where('name', '=', $request->header('language'))->first();
+                $tags = Tag::where('language_id', '=', $language->id)->get();
+                return $this->successResponse(TagResource::collection($tags));
             }
-            $args['data'] = TagResource::collection($tag);
-            return $this->successResponse($args , 200);
+            if (!$tags = Tag::all())
+                return $this->errorResponse('there are no tags ');
+            return $this->successResponse(TagResource::collection($tags));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    /**
-     * @OA\Post(
-     *     path="/api/tags",
-     *     summary="Create a new tag",
-     *     @OA\Parameter(
-     *         name="name",
-     *         in="query",
-     *         description="Article name",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *        @OA\Parameter(
-     *         name="lang",
-     *         in="query",
-     *         description="Article lang",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(response="200", description="tag created successfully"),
-     *     @OA\Response(response="422", description="Validation errors")
-     * )
-     */
-    public function store(StoreTagRequest  $request)
+    public function store(StoreTagRequest $request):JsonResponse
     {
         try {
-            $validated = $request->validated();
 
-            $tag = Tag::create([
+            Tag::create([
                 'name' => $request->name,
                 'language_id' => $request->language_id,
             ]);
-            $args['data'] =  new TagResource($tag);
-            $args['message'] =  'tag stored successfully ';
-            return $this->successResponse($args,200);
+            return $this->successOperationResponse('tag stored successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Tag $tag, Request $request)
+    public function show(Tag $tag, Request $request): JsonResponse
     {
         try {
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-                if ($language->id == $tag->language_id) {
-                    $tag = Tag::whereHas('langauges', function ($query) use ($language) {
-                        $query->where('language_id', '=', $language->id);
-                    })->first();
-                } else {
-                    return $this->FailResponse('there is no matching lang');
+                $language = Language::where('name', '=', $request->header('language'))->first();
+                if ($language->id != $tag->language_id) {
+                    return $this->errorResponse('this tag for another language');
                 }
             }
-            $args['data'] = new TagResource($tag);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse(new TagResource($tag));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateTagRequest $request, Tag $tag)
+    public function update(UpdateTagRequest $request, Tag $tag): JsonResponse
     {
         try {
-            $validated = $request->validated();
 
             $tag->update([
                 'name' => $request->name ?? $tag->name,
                 'language_id' => $request->language_id ?? $tag->language_id,
             ]);
-            $args['data'] =  new TagResource($tag);
-            $args['message'] =  'tag updated successfully ';
-            return $this->successResponse($args,200);
+            return $this->successOperationResponse( 'tag updated successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Tag $tag)
+    public function destroy(Tag $tag): JsonResponse
     {
         try {
-            $tag->delete();
 
-            $args['message'] =  'tag deleted successfully ';
-            return $this->successResponse($args,200);        } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            $tag->delete();
+            return $this->successOperationResponse('tag deleted successfully ');
+        } catch (\Throwable $th) {
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }

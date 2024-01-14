@@ -1,92 +1,92 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\API\TagController;
-use App\Http\Controllers\API\AuthController;
-use App\Http\Controllers\API\FoodController;
-use App\Http\Controllers\API\PostController;
-use App\Http\Controllers\API\RoomController;
-use App\Http\Controllers\API\UserController;
-use App\Http\Controllers\API\SocialController;
-use App\Http\Controllers\API\ArticleController;
-use App\Http\Controllers\API\BookingController;
-use App\Http\Controllers\API\GeneralController;
-use App\Http\Controllers\API\ServiceController;
-use App\Http\Controllers\API\CategoryController;
-use App\Http\Controllers\API\LanguageController;
-use App\Http\Controllers\API\RoomTypeController;
-use App\Http\Controllers\API\HelpCenterController;
-use App\Http\Controllers\API\FoodCategoryController;
-use App\Http\Controllers\API\ImageController;
-use App\Http\Controllers\API\VideoController;
+        use Illuminate\Support\Facades\Route;
+        use App\Http\Controllers\API\{
+            TagController,
+            AuthController,
+            FoodController,
+            PostController,
+            RoomController,
+            UserController,
+            SocialController,
+            ArticleController,
+            BookingController,
+            GeneralController,
+            ServiceController,
+            CategoryController,
+            LanguageController,
+            RoomTypeController,
+            HelpCenterController,
+            FoodCategoryController,
+            ImageController,
+            VideoController
+        };
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider and all of them will
-| be assigned to the "api" middleware group. Make something great!
-|
-*/
+        /*
+        |--------------------------------------------------------------------------
+        | API Routes
+        |--------------------------------------------------------------------------
+        |
+        | Register API routes for the application. These routes are loaded by
+        | the RouteServiceProvider and assigned to the "api" middleware group.
+        |
+        */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
-Route::apiResource('languages',LanguageController::class);
-Route::apiResource('posts',PostController::class);
+        // Authentication routes
+        Route::group(['middleware' => 'api', 'prefix' => 'auth'], function () {
+            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::get('/me', [AuthController::class, 'me']);
+        });
 
+        // Resourceful routes grouped by controllers
+        Route::group(['middleware' => 'api'], function () {
+            Route::apiResource('users', UserController::class);
+            Route::apiResource('posts', PostController::class);
+            Route::apiResource('languages', LanguageController::class);
+            Route::apiResource('articles', ArticleController::class);
+            Route::apiResource('categories', CategoryController::class);
+            Route::apiResource('tags', TagController::class);
+            Route::apiResource('socials', SocialController::class);
+            Route::apiResource('helpcenter', HelpCenterController::class)->except(['destroy' ,'update']);
+            Route::apiResource('generals', GeneralController::class)->except(['update']);
+            Route::apiResource('roomtypes', RoomTypeController::class);
+            Route::apiResource('foodcategories', FoodCategoryController::class);
+            Route::apiResource('videos', VideoController::class);
+            Route::apiResource('images', ImageController::class);
+            Route::apiResource('foods', FoodController::class);
+            Route::apiResource('bookings', BookingController::class)->except(['update']);
+            Route::apiResource('rooms', RoomController::class);
+            Route::apiResource('services', ServiceController::class);
 
-Route::apiResource('users',UserController::class);
+        // get the deleted questions in help center
+        Route::get('/deleted_questions', [HelpCenterController::class, 'deleted_questions']);
+        // Delete a resource in HelpCenter (except 'destroy' and 'update' actions)
+        Route::delete('/helpCenter', [HelpCenterController::class, 'destroy']);
+        });
 
-Route::fallback(function(){
-    return response()->json([
-        'message' => 'Page Not Found.'], 404);
-});
+        /*
+        * Additional custom routes
+        */
 
-Route::group(['middleware' => 'api','prefix' => 'auth'],function ($router) {
-    Route::post('/login', [AuthController::class,'login']);
-    Route::post('/logout', [AuthController::class,'logout']);
-    Route::get('/me', [AuthController::class,'me']);
-});
-
-Route::apiResource('articles',ArticleController::class);
-
-Route::apiResource('categories',CategoryController::class);
-
-Route::get('/deleted_articles',[ArticleController::class,'deleted_articles'])->name('deleted_articles');
-
-Route::delete('/forceDestroy/{id}',[ArticleController::class,'forceDestroy'])->name('forceDestroy');
-
-Route::get('/related_articles/{article}',[ArticleController::class,'related_articles'])->name('related_articles');
-
-Route::apiResource('tags',TagController::class);
-
-Route::apiResource('socials',SocialController::class);
-
-Route::apiResource('helpcenter',HelpCenterController::class)->except(['destroy','update']);
-
-Route::apiResource('generals',GeneralController::class)->except(['update']);
-
-Route::put('general_update/{id}',[GeneralController::class,'update'])->name('general_update');
-
-Route::apiResource('roomtypes',RoomTypeController::class);
-
-Route::apiResource('foodcategories',FoodCategoryController::class);
-Route::apiResource('videos',VideoController::class);
-Route::apiResource('images',ImageController::class);
-
-Route::apiResource('foods', FoodController::class);
+        // Delete an article forcefully (permanent delete)
+        Route::delete('/forceDestroy/{id}', [ArticleController::class, 'forceDestroy'])->name('forceDestroy');
+        // Update a general resource
+        Route::put('general_update/{id}', [GeneralController::class, 'update'])->name('general_update');
+        // Get related articles for a specific article
+        Route::get('/related_articles/{article}', [ArticleController::class, 'related_articles'])->name('related_articles');
+        // Get a list of deleted rooms
+        Route::get('/deleted_rooms', [RoomController::class, 'deleted_rooms'])->name('deleted_rooms');
 
 
-Route::apiResource('bookings',BookingController::class)->except(['update']);
+        // Get a list of deleted articles
+        Route::get('/deletedArticles', [ArticleController::class, 'deletedArticles'])->name('deletedArticles');
 
-Route::apiResource('rooms', RoomController::class);
 
-Route::delete('/delete',[HelpCenterController::class,'destroy'])->name('delete');
+        // Fallback route for handling 404 errors
+        Route::fallback(function () {
+            return response()->json([
+                'message' => 'Page Not Found.'
+            ], 404);
+        });
 
-Route::get('/deleted_rooms',[RoomController::class,'deleted_rooms'])->name('deleted_rooms');
-
-Route::apiResource('services', ServiceController::class);

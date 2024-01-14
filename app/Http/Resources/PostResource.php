@@ -16,14 +16,15 @@ class PostResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'title'       =>$this->title,
-            'summary'     =>$this->summary,
-            'description' =>$this->description,
-            'images'      => $this->images->pluck('url'),
-            'videos'      => $this->videos->pluck('video'),
-            'created_at'  =>$this->created_at,
-            'language'=> $this->langauges->name,
-            //'category'    =>new CategoryResource($this->category),
+            'id'               => $this->id ,
+            'title'            => $this->title,
+            'summary'          => $this->summary,
+            'description'      => $this->description,
+            'images'           => $this->images->pluck('url'),
+            'videos'           => $this->videos->pluck('video'),
+            'created_at'       => $this->created_at,
+            'language'         => $this->langauges->name,
+            'category'         => $this->category->name,
         ];
     }
 }

@@ -15,6 +15,7 @@ class BookingResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
             'phone' => $this->phone,
@@ -23,7 +24,9 @@ class BookingResource extends JsonResource
             'check_in' => $this->check_in,
             'check_out' => $this->check_out,
             'order date' => $this->created_at,
-            'room type' =>new RoomTypeResource($this->type),
-        ];
+            'room type' =>  $this->type()->pluck('name'),
+            'date of create ' =>$this->created_at,
+
+            ];
     }
 }

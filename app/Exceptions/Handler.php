@@ -32,7 +32,7 @@ class Handler extends ExceptionHandler
     }
     public  function render($request  , Throwable $e ) {
         if ($e instanceof ModelNotFoundException ) {
-            return $this->FailResponse('model not found ');
+            return $this->notFoundResponse( 'model not found ');
         }
         parent::render($request , $e);
     }

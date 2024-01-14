@@ -9,114 +9,111 @@ use App\Http\Requests\StoreSocialRequest;
 use App\Http\Requests\UpdateSocialRequest;
 use App\Traits\APIResponseTrait;
 use App\Traits\UploadImage;
+use Illuminate\Http\JsonResponse;
 
 class SocialController extends Controller
 {
-    use APIResponseTrait,UploadImage;
+    use APIResponseTrait, UploadImage;
+
     public function __construct()
     {
-        $this->middleware('auth:api',['except' => ['index','show']]);
+        $this->middleware('auth:api', ['except' => ['index', 'show']]);
     }
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
         try {
             $link = SocialMedia::all();
-            $args['data'] = SocialResource::collection($link);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse(SocialResource::collection($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSocialRequest $request)
+    public function store(StoreSocialRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validated();
-
             $link = SocialMedia::create([
                 'name' => $request->name,
                 'link' => $request->link,
             ]);
             $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/SocialMedia');
-                $link->images()->create(['url'=>$file_name]);
+            foreach ($get_images as $image) {
+                $file_name = $this->StoreImage($image, 'public/SocialMedia');
+                $link->images()->create(['url' => $file_name]);
             }
-            $args['message'] = 'social media account  stored successfully ';
-            $args['data'] = new SocialResource($link);
-            return $this->successResponse($args , 200 );
+            return $this->successResponse('social media account  stored successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
         try {
-            $link = SocialMedia::findOrFail($id);
-            $args['data'] = new SocialResource($link);
-            return $this->successResponse($args , 200 );
+            $link = SocialMedia::find($id);
+            if (!$link)
+                return $this->errorResponse('there are no data for this id ');
+            return $this->successResponse(new SocialResource($link));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateSocialRequest $request, String $id)
+    public function update(UpdateSocialRequest $request, string $id): JsonResponse
     {
         try {
-            $validated = $request->validated();
-
-            $link = SocialMedia::findOrFail($id);
-            $path = 'public/SocialMedia';
-            foreach($link ->images as $image){
-                $this->DeleteImage($path,$image);
-               }
-
+            $link = SocialMedia::find($id);
+            if (!$link)
+                return $this->errorResponse('there are no data for this id ');
+            if ($request->hasFile('images'))    {
+                foreach ($link->images as $image) {
+                    $this->DeleteImage('public/SocialMedia', $image);
+                }
+                $get_images = $request->file('images');
+                foreach ($get_images as $image) {
+                    $file_name = $this->StoreImage($image, 'public/SocialMedia');
+                    $link->images()->create(['url' => $file_name]);
+                }
+            }
             $link->update([
                 'name' => $request->name,
                 'link' => $request->link,
             ]);
-            $get_images = $request->file('images');
-            foreach($get_images as $image){
-                $file_name  = $this->StoreImage($image,'public/SocialMedia');
-                $link->images()->create(['url'=>$file_name]);
-            }
-            $args['message'] = 'social media account  updated successfully ';
-            $args['data'] = new SocialResource($link) ;
-            return $this->successResponse($args , 200 );
+            return $this->successOperationResponse('social media account  updated successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(string $id): JsonResponse
     {
         try {
-            $link = SocialMedia::findOrFail($id);
-            $path = 'public/SocialMedia';
-            foreach($link ->images as $image){
-                $this->DeleteImage($path,$image);
-               }
+            $link = SocialMedia::find($id);
+            if (!$link)
+                return $this->errorResponse('there are no data for this id ');
+            foreach ($link->images as $image) {
+                $this->DeleteImage('public/SocialMedia', $image);
+            }
             $link->delete();
-            $args['message'] = 'social media account deleted successfully ';
-            return $this->successResponse($args , 200);
+            return $this->successOperationResponse('social media account deleted successfully ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }

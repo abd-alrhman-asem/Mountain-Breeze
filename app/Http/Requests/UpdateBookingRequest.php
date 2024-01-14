@@ -2,10 +2,16 @@
 
 namespace App\Http\Requests;
 
+use App\Traits\APIResponseTrait;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class UpdateBookingRequest extends FormRequest
 {
+    use APIResponseTrait;
+
     /**
      * Determine if the user is authorized to make this request.
      */
@@ -17,7 +23,7 @@ class UpdateBookingRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array|string>
      */
     public function rules(): array
     {
@@ -31,5 +37,15 @@ class UpdateBookingRequest extends FormRequest
             'guest_number'=> 'required|integer',
             'room_type_id'=>'required|integer|exists:room_types,id',
         ];
+    }
+    protected function failedValidation(Validator $validator): void
+    {
+        $errorMessage = $validator->errors()->all();
+        $errorMessage = (string) array_pop($errorMessage);
+        throw new HttpResponseException(
+            response: $this->unprocessableResponse(
+                $errorMessage
+            )
+        );
     }
 }

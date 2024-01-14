@@ -13,213 +13,216 @@ use App\Traits\APIResponseTrait;
 use Illuminate\Http\Request;
 use App\Traits\UploadImage;
 use App\Traits\UploadVideo;
+use Illuminate\Http\JsonResponse;
+use Carbon\Carbon; // Import Carbon for date manipulation
+
 
 class ArticleController extends Controller
 {
-
-//    public function __construct()
-//    {
-//        $this->middleware('auth:api', ['except' => ['index', 'show', 'related_articles']]);
-//    }
-
     use APIResponseTrait, UploadImage, UploadVideo;
     public function __construct()
     {
-        $this->middleware('auth:api',['except' => ['index','show','deleted_articles','related_articles']]);
+        $this->middleware('auth:api',['except' => ['index','show','related_articles']]);
     }
+
     /**
-     * Display a listing of the resource.
+     * Retrieve a paginated list of articles, applying optional filtering based on request parameters.
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
-    /**
-     * @OA\Get(
-     *     path="/api/articles",
-     *     summary="Get articles details",
-     *     @OA\Response(response="200", description="Success"),
-     * )
-     */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try {
-            $articles = Article::paginate(9);
+            // Initiate query builder for constructing the article query
+            $articlesQuery = Article::query();
 
+            // Apply filtering based on request parameters
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
+                $language = Language::where('name', $request->header('language'))->first();
 
-                $articles = Article::whereHas('langauges', function ($query) use ($language) {
-                    $query->where('language_id', '=', $language->id);
-                })->paginate(9);
+                if ($language) {
+                    $articlesQuery->where('language_id', $language->id);
+                } else {
+                    return $this->errorResponse('There is no language like this.');
+                }
             }
 
             if ($request->has('created_at')) {
-                $articles = Article::where('created_at', '=', $request->created_at)->paginate(9);
+                // Optimize date filtering using a range query with Carbon
+                $articlesQuery->whereBetween('created_at', [
+                    Carbon::parse($request->created_at)->startOfDay(),
+                    Carbon::parse($request->created_at)->endOfDay(),
+                ]);
             }
 
             if ($request->has('id')) {
-                $tagName = Tag::findOrFail($request->id);
-                $articles = Article::whereHas('tags', function ($query) use ($tagName) {
-                    $query->whereName($tagName->name);
-                })->paginate(9);
+                $tag = Tag::findOrFail($request->id);
+                $articlesQuery->whereHas('tags', function ($query) use ($tag) {
+                    $query->whereName($tag->name);
+                });
             }
-            $args['data'] = ArticleResource::collection($articles);
-            return $this->successResponse( $args ,200 );
+
+            // Eager load relationships to prevent N+1 query issues
+            $articles = $articlesQuery->with('tags')->simplePaginate(9);
+
+            // Check for empty results before returning
+            if (!$articles->items()) {
+                // Determine appropriate error message based on filters applied
+                return $this->errorResponse('No articles found matching the criteria.');
+            }
+
+            // Create resource collection outside try-catch block for proper resource handling
+            $articleResource = ArticleResource::collection($articles);
+
+            return $this->successResponse($articleResource);
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            // Catch any exceptions and return an error response
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display a listing of the deleted resource.
      */
-    public function deleted_articles(Request $request)
+    public function deletedArticles(Request $request): JsonResponse
     {
         try {
-            if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
+            // Set a default pagination value
+            $articles = Article::withTrashed()->simplePaginate();
+            // Check if 'language' header is present in the request
+            if ($languageHeader = $request->header('language')) {
+                // Attempt to find the language by name
+                $language = Language::where('name', $languageHeader)->first();
 
-                $articles = Article::whereHas('langauges', function ($query) use ($language) {
-                    $query->where('language_id', '=', $language->id);
-                })->onlyTrashed()->get();
+                // If language found, filter articles by language
+                if ($language) {
+                    $articles = Article::where('language_id', $language->id)->onlyTrashed()->simplePaginate(9);
+                } else {
+                    // Return error if no language found
+                    return $this->errorResponse('There is no language like this.');
+                }
             }
-            if (empty($articles)) {
-                    return $this->FailResponse('there is no deleted articles');
+            // Check if there are no deleted articles
+            if (!$articles->items()) {
+                return $this->errorResponse('There are no deleted articles.');
             }
-              $args['data'] = ArticleResource::collection($articles);
-            return $this->successResponse( $args ,200 );
-//            return $this->successResponse(ArticleResource::collection($articles));
+            // Return success response with paginated deleted articles
+            return $this->successResponse(ArticleResource::collection($articles));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            // Catch any exceptions and return an error response
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Display related articles
      */
-    public function related_articles(Article $article)
+    public function related_articles(Article $article): JsonResponse
     {
         try {
-            if (!isset($article)) {
-                return $this->FailResponse('there is no article for  this id ');
+            if (!$article) {
+                return $this->errorResponse('there are no article for  this id ');
             }
-            $tags = $article->tags;
-            if ($tags->isEmpty()) {
-                return $this->FailResponse("this article has no tags");
+            if (!$tags = $article->tags) {
+                return $this->errorResponse("this article has no tags");
             }
 
             $articles = Article::whereHas('tags', function ($query) use ($article) {
                 return $query->whereIn('name', $article->tags->pluck('name'));
             })->where('language_id', '=', $article->language_id)
                 ->where('id', '!=', $article->id)->get();
-
-
-            if ($articles->isEmpty()) {
-                return $this->FailResponse("there is no article related ");
+            if (!$articles) {
+                return $this->errorResponse("there are no articles related ");
             }
-            $args['data'] = ArticleResource::collection($articles);
-            return $this->successResponse( $args ,200 );
+            return $this->successResponse( ArticleResource::collection($articles) ,200 );
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new article in the database.
+     *
+     * @param StoreArticleRequest $request
+     * @return JsonResponse
      */
-    /**
-     * @OA\Post(
-     *     path="/api/articles",
-     *     summary="Create a new article",
-     *     @OA\Parameter(
-     *         name="title",
-     *         in="query",
-     *         description="Article title",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *        @OA\Parameter(
-     *         name="summary",
-     *         in="query",
-     *         description="Article summary",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *        @OA\Parameter(
-     *         name="description",
-     *         in="query",
-     *         description="Article description",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *        @OA\Parameter(
-     *         name="lang",
-     *         in="query",
-     *         description="Article lang",
-     *         required=true,
-     *         @OA\Schema(type="string")
-     *     ),
-     *     @OA\Response(response="200", description="Article created successfully"),
-     *     @OA\Response(response="422", description="Validation errors")
-     * )
-     */
-    public function store(StoreArticleRequest $request)
+    public function store(StoreArticleRequest $request): JsonResponse
     {
-
         try {
+            // Validate the request data using the StoreArticleRequest class
             $validated = $request->validated();
 
+            // Create a new Article instance
             $article = new Article();
 
+            // Populate the article attributes from the validated request data
             $article->title = $request->title;
             $article->summary = $request->summary;
             $article->description = $request->description;
             $article->language_id = $request->language_id;
 
+            // Save the article to the database
             $article->save();
 
+            // Attach the specified tags to the article
             $article->tags()->attach($request->tags);
 
-//            $args = $this->getArgs($request, $article);
-            $args['message'] = "article created successfully ";
-            return $this->successResponse( $args ,200 );
+            // Return a success response with the created article resource
+            return $this->createdResponse('article ');
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            // Catch any exceptions and return an error response
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
-     * Display the specified resource.
+     * Retrieve a single article based on ID, optionally filtering by language header.
+     *
+     * @param Article $article
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function show(Article $article, Request $request)
+    public function show(Article $article, Request $request): JsonResponse
     {
         try {
+            // Apply language filtering if header is present
             if ($request->header('language')) {
-                $language_header = $request->header('language');
-                $language = Language::where('name', '=', $language_header)->first();
-                if ($language->id == $article->language_id)
-                {
-                    $article = Article::whereHas('langauges', function ($query) use ($language) {
-                        $query->where('language_id', '=', $language->id);
-                    })->where('id', '=', $article->id)->first();
+                $language = Language::where('name', $request->header('language'))->first();
+
+                if ($language) {
+                    // Ensure language matches the article's language
+                    if ($language->id === $article->language_id) {
+                        // Retrieve the article with the specified language and ID
+                        $article = Article::where('language_id', $language->id)
+                            ->where('id', $article->id)->first();
+                    } else {
+                        return $this->errorResponse('lang docent match');
+                    }
                 } else {
-                    return $this->FailResponse('lang docent match ');
+                    return $this->errorResponse('There is no language like this.');
                 }
             }
-            $args['data'] = new ArticleResource($article);
-            return $this->successResponse( $args ,200 );
+
+            // Return the article as a resource
+            return $this->successResponse(new ArticleResource($article));
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
-     * Update the specified resource in storage.
+     * Updates an existing article in the database.
+     *
+     * @param UpdateArticleRequest $request
+     * @param Article $article
+     * @return JsonResponse
      */
-    public function update(UpdateArticleRequest $request, string $id)
+    public function update(UpdateArticleRequest $request, Article $article): JsonResponse
     {
         try {
-            $validated = $request->validated();
-            $article = Article::findOrFail($id);
+
+            // this need to back to it photo not working
             $path = 'public/Articles';
             foreach ($article->images as $image) {
                 $this->DeleteImage($path, $image);
@@ -228,43 +231,50 @@ class ArticleController extends Controller
             foreach ($article->videos as $video) {
                 $this->DeleteVideo($path, $video);
             }
+
+
             $article->update([
-                'title' => $request->title ?? $article->title,
-                'summary' => $request->summary ?? $article->summary,
+                'title' => $request->title             ?? $article->title,
+                'summary' => $request->summary         ?? $article->summary,
                 'description' => $request->description ?? $article->description,
                 'language_id' => $request->language_id ?? $article->language_id,
             ]);
-
             $article->tags()->sync($request->tags);
 
-//            $args = $this->getArgs($request, $article);
-            $args['message'] = "article updated successfully ";
-            return $this->successResponse( $args ,200 );
+            return $this->successOperationResponse("articles updated successfully");
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Deletes an existing article from the database (or marks it as deleted if using soft deletes).
+     *
+     * @param Article $article
+     * @return JsonResponse
      */
-    public function destroy(Article $article): \Illuminate\Http\JsonResponse
+    public function destroy(Article $article): JsonResponse
     {
         try {
+            // Delete the article (or mark it as deleted if using soft deletes)
             $article->delete();
-            $args['message'] = "article deleted successfully ";
-            return $this->successResponse( $args ,200 );
+
+            // Return a success response with an appropriate message
+            return $this->successOperationResponse("Article moved to trash"); // Adjust message if not using soft deletes
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            // Catch any exceptions and return an error response
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
-    public function forceDestroy(string $id): \Illuminate\Http\JsonResponse
+
+    public function forceDestroy(string $id): JsonResponse
     {
         try {
+
             $article = Article::onlyTrashed()->find($id);
 
-            if(!isset($article))
-              return $this->FailResponse('there is no article to delete');
+            if(!$article)
+              return $this->errorResponse('article not found in trash ');
 
             $path = 'public/Articles';
             foreach ($article->images as $image) {
@@ -276,10 +286,10 @@ class ArticleController extends Controller
             }
             $article->tags()->detach();
             Article::where('id', '=', $id)->forceDelete();
-            $args['message'] = "article deleted forever successfully ";
-            return $this->successResponse( $args ,200 );
+             return $this->successOperationResponse("article deleted forever successfully ");
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }
+

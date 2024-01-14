@@ -25,7 +25,7 @@ class Article extends Model
     ];
 
     /**
-     * Get all of the comments for the User
+     * Get all the comments for the User
      *
      */
     public function tags()

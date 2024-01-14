@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Image;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Traits\APIResponseTrait;
 use App\Http\Controllers\Controller;
@@ -20,7 +21,7 @@ class ImageController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         try{
             $images = Image::paginate(14);
@@ -28,27 +29,27 @@ class ImageController extends Controller
                 $images = Image::where('category_id', '=', $request->category_id)->paginate(14);
             }
 
-            return ImageResource::collection( $images) ;
+            return $this->successResponse(ImageResource::collection( $images)) ;
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreImageRequest $request)
+    public function store(StoreImageRequest $request): JsonResponse
     {
         try{
             $file_name  = $this->StoreImage($request->url, 'public/Images/Dashboard');
-            $video = Image::create([
+             Image::create([
                 'url'      =>$file_name,
                 'category_id'=>$request->category_id,
             ]);
-            return new ImageResource($video);
+            return $this->successOperationResponse('images stored successfully');
 
         } catch (\Throwable $th) {
-            return $this->FailResponse($th->getMessage());
+            return $this->generalFailureResponse($th->getMessage());
         }
     }
 }

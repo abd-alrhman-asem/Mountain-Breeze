@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Booking;
+use App\Models\RoomType;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,15 +15,20 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            UserSeeder::class,
-            LanguageSeeder::class,
+            bookingSeeder::class,
             CategorySeeder::class,
             FoodCategorySeeder::class,
-            ServicesSeeder::class,
-            TagsSeeder::class,
-            RoomTypeSeeder::class,
+            FoodSeeder::class,
             GeneralSeeder::class,
-            SocialSeeder::class
+            HelpCenterSeeder::class,
+            LanguageSeeder::class,
+            PostSeeder::class,
+            RoomSeeder::class,
+            RoomTypeSeeder::class,
+            ServicesSeeder::class,
+            SocialSeeder::class,
+            TagsSeeder::class,
+            UserSeeder::class,
         ]);
     }
 }

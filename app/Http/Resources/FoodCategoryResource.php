@@ -15,6 +15,7 @@ class FoodCategoryResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'name'   =>$this->name,
             'summary'=>$this->summary,
             'language'=> new LanguageResource($this->langauges),
